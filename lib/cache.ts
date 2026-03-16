@@ -1,8 +1,13 @@
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+})
 
 export async function getCached<T>(key: string): Promise<T | null> {
   try {
-    const cached = await kv.get<T>(key)
+    const cached = await redis.get<T>(key)
     return cached ?? null
   } catch {
     return null
@@ -11,7 +16,7 @@ export async function getCached<T>(key: string): Promise<T | null> {
 
 export async function setCached<T>(key: string, value: T, ttlSeconds = 60): Promise<void> {
   try {
-    await kv.set(key, value, { ex: ttlSeconds })
+    await redis.set(key, value, { ex: ttlSeconds })
   } catch {
     // Non-fatal — proceed without caching
   }

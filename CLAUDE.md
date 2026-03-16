@@ -14,7 +14,7 @@ and team profiles. Built with Next.js 16.1, deployed on Vercel.
 - **Components**: shadcn/ui
 - **WC26 static data**: wc26-mcp (npm package, zero API keys needed)
 - **Live scores**: football-data.org REST API (env: FOOTBALL_DATA_API_KEY)
-- **Cache**: Vercel KV / Redis (@vercel/kv) for rate-limit buffering
+- **Cache**: Upstash Redis (@upstash/redis) for rate-limit buffering
 - **React version**: 19.2 (ships with Next.js 16.1)
 
 ---
@@ -63,7 +63,7 @@ and team profiles. Built with Next.js 16.1, deployed on Vercel.
 /lib
   wc26.ts                     ← wc26-mcp wrapper/helpers
   football-data.ts            ← football-data.org API client
-  cache.ts                    ← Vercel KV helpers
+  cache.ts                    ← Upstash Redis helpers
 /types
   index.ts                    ← shared TypeScript types
 ```
@@ -77,7 +77,7 @@ and team profiles. Built with Next.js 16.1, deployed on Vercel.
 - **Async/await** over `.then()` — always.
 - **Always handle loading and error states.** Use shadcn `Skeleton` for loading,
   and a visible error message (not just a console.error) for errors.
-- **All external API calls must be cached.** Minimum 60 seconds via Vercel KV or
+- **All external API calls must be cached.** Minimum 60 seconds via Upstash Redis or
   Next.js `cacheLife`. Never call football-data.org directly from a client component.
 - **No barrel files** (`index.ts` re-exports) — import directly from the source file.
 - **Co-locate page-specific components** with their page in `/features`, not in `/shared`.
@@ -91,19 +91,12 @@ All `/app/api/` routes follow this pattern:
 
 ```ts
 import { NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
+import { withCache } from '@/lib/cache'
 
 const CACHE_TTL = 60 // seconds
 
 export async function GET() {
-  const cacheKey = 'scores:live'
-
-  const cached = await kv.get(cacheKey)
-  if (cached) return NextResponse.json(cached)
-
-  const data = await fetchFromExternalAPI()
-  await kv.set(cacheKey, data, { ex: CACHE_TTL })
-
+  const data = await withCache('scores:live', fetchFromExternalAPI, CACHE_TTL)
   return NextResponse.json(data)
 }
 ```
@@ -149,9 +142,9 @@ export async function GET() {
 # football-data.org
 FOOTBALL_DATA_API_KEY=
 
-# Vercel KV (auto-populated on Vercel, needed locally for dev)
-KV_REST_API_URL=
-KV_REST_API_TOKEN=
+# Upstash Redis — https://console.upstash.com
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 ```
 
 Never hardcode these. Always read from `process.env`. If a key is missing,
@@ -175,11 +168,11 @@ Tournament dates: **11 June – 19 July 2026**
 
 ## football-data.org usage
 
-- Free tier: 10 requests/minute. **Always go through the KV cache.**
+- Free tier: 10 requests/minute. **Always go through the Upstash Redis cache.**
 - Base URL: `https://api.football-data.org/v4`
 - Auth header: `X-Auth-Token: ${process.env.FOOTBALL_DATA_API_KEY}`
 - VM 2026 competition code: `WC` (verify at start of tournament)
-- Poll live scores every 60 seconds max — use KV TTL to enforce this.
+- Poll live scores every 60 seconds max — use Redis TTL to enforce this.
 
 ---
 

@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { getFixtures, getTeamById } from '@/lib/wc26'
-import { MatchCard } from '@/components/features/fixtures/MatchCard'
+import { getFixtures, getTeamById, getHistoricalMatchup } from '@/lib/wc26'
+import { getLocale, dateLocale } from '@/lib/locale'
+import { dict } from '@/lib/i18n'
+import { MatchDetailSheet } from '@/components/features/fixtures/MatchDetailSheet'
 import { FixturesFilterBar } from '@/components/features/fixtures/FixturesFilterBar'
 import { MatchListSkeleton } from '@/components/features/fixtures/MatchCardSkeleton'
 import type { MatchFixture, MatchRound } from '@/types/index'
+import type { Dict } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   title: 'Fixtures',
@@ -23,10 +26,10 @@ interface PageProps {
 
 // ── Date header ──────────────────────────────────────────────────────────────
 
-function DateHeader({ dateStr }: { dateStr: string }) {
+function DateHeader({ dateStr, dl }: { dateStr: string; dl: string }) {
   const date = new Date(dateStr + 'T12:00:00Z')
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })
-  const formatted = date.toLocaleDateString('en-US', {
+  const weekday = date.toLocaleDateString(dl, { weekday: 'long', timeZone: 'UTC' })
+  const formatted = date.toLocaleDateString(dl, {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -44,22 +47,25 @@ function DateHeader({ dateStr }: { dateStr: string }) {
 
 function FixturesList({
   fixtures,
+  t,
+  dl,
 }: {
   fixtures: MatchFixture[]
+  t: Dict
+  dl: string
 }) {
   if (fixtures.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 py-16 text-center dark:border-zinc-800">
         <span className="text-3xl">🔍</span>
-        <p className="mt-3 font-medium text-zinc-700 dark:text-zinc-300">No matches found</p>
+        <p className="mt-3 font-medium text-zinc-700 dark:text-zinc-300">{t.fixtures.noMatchesFound}</p>
         <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
-          Try clearing the filters or picking a different date
+          {t.fixtures.noMatchesHint}
         </p>
       </div>
     )
   }
 
-  // Group by date
   const byDate = fixtures.reduce<Record<string, MatchFixture[]>>((acc, m) => {
     if (!acc[m.date]) acc[m.date] = []
     acc[m.date].push(m)
@@ -73,14 +79,22 @@ function FixturesList({
       {sortedDates.map((date) => (
         <section key={date}>
           <div className="mb-3 flex items-center gap-3">
-            <DateHeader dateStr={date} />
+            <DateHeader dateStr={date} dl={dl} />
             <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-              {byDate[date].length} match{byDate[date].length !== 1 ? 'es' : ''}
+              {t.fixtures.matchCount(byDate[date].length)}
             </span>
           </div>
           <div className="stagger-children space-y-2.5">
             {byDate[date].map((fixture) => (
-              <MatchCard key={fixture.id} fixture={fixture} />
+              <MatchDetailSheet
+                key={fixture.id}
+                fixture={fixture}
+                matchup={
+                  fixture.home && fixture.away
+                    ? getHistoricalMatchup(fixture.home.id, fixture.away.id)
+                    : undefined
+                }
+              />
             ))}
           </div>
         </section>
@@ -98,6 +112,10 @@ export default async function FixturesPage({ searchParams }: PageProps) {
   const round = params.round as MatchRound | undefined
   const teamId = params.team
 
+  const locale = await getLocale()
+  const t = dict[locale]
+  const dl = dateLocale(locale)
+
   const fixtures = getFixtures({
     group: group ?? undefined,
     date: date ?? undefined,
@@ -113,12 +131,12 @@ export default async function FixturesPage({ searchParams }: PageProps) {
       {/* Page header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-          Fixtures
+          {t.fixtures.title}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           {fixtures.length === totalCount
-            ? `All ${totalCount} matches · 11 Jun – 19 Jul 2026`
-            : `${fixtures.length} of ${totalCount} matches`}
+            ? t.fixtures.allMatches(totalCount)
+            : t.fixtures.filteredMatches(fixtures.length, totalCount)}
         </p>
       </div>
 
@@ -133,7 +151,7 @@ export default async function FixturesPage({ searchParams }: PageProps) {
             href="/fixtures"
             className="ml-auto text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
           >
-            Clear ×
+            {t.fixtures.clear} ×
           </Link>
         </div>
       )}
@@ -150,7 +168,7 @@ export default async function FixturesPage({ searchParams }: PageProps) {
         fallback={<MatchListSkeleton count={6} />}
         key={`${group ?? ''}-${date ?? ''}-${round ?? ''}-${teamId ?? ''}`}
       >
-        <FixturesList fixtures={fixtures} />
+        <FixturesList fixtures={fixtures} t={t} dl={dl} />
       </Suspense>
     </div>
   )

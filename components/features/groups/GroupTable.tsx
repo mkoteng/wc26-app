@@ -7,10 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { dict } from '@/lib/i18n'
+import type { Locale } from '@/lib/locale'
 import type { GroupStandingTable, GroupStanding } from '@/types/index'
 
 interface GroupTableProps {
   group: GroupStandingTable
+  locale: Locale
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -26,10 +29,12 @@ function StandingRow({
   standing,
   position,
   qualifies,
+  hostLabel,
 }: {
   standing: GroupStanding
   position: number
   qualifies: boolean
+  hostLabel: string
 }) {
   const { team } = standing
 
@@ -63,7 +68,7 @@ function StandingRow({
           </span>
           {team.is_host && (
             <span className="hidden shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-semibold leading-none text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 sm:inline">
-              Host
+              {hostLabel}
             </span>
           )}
         </Link>
@@ -123,16 +128,17 @@ function StandingRow({
 
 // ── GroupTable ────────────────────────────────────────────────────────────────
 
-export function GroupTable({ group }: GroupTableProps) {
+export function GroupTable({ group, locale }: GroupTableProps) {
+  const t = dict[locale].groups
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       {/* Card header */}
       <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
         <h2 className="text-sm font-bold tracking-wide text-zinc-900 dark:text-white">
-          Group {group.groupId}
+          {t.group(group.groupId)}
         </h2>
         <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          Top 2 advance
+          {t.top2Advance}
         </span>
       </div>
 
@@ -166,7 +172,7 @@ export function GroupTable({ group }: GroupTableProps) {
               #
             </TableHead>
             <TableHead className="py-2 pl-1 pr-2 text-xs text-zinc-400 dark:text-zinc-500">
-              Team
+              {t.teamHeader}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               P
@@ -202,6 +208,7 @@ export function GroupTable({ group }: GroupTableProps) {
               standing={standing}
               position={i + 1}
               qualifies={i < 2}
+              hostLabel={dict[locale].teams.host}
             />
           ))}
         </TableBody>
@@ -210,7 +217,7 @@ export function GroupTable({ group }: GroupTableProps) {
       {/* Legend — mobile only */}
       <div className="border-t border-zinc-100 px-4 py-2 dark:border-zinc-800 sm:hidden">
         <p className="text-xs text-zinc-400 dark:text-zinc-500">
-          Full stats on wider screens
+          {t.fullStats}
         </p>
       </div>
     </div>

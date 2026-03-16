@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import { Nav } from '@/components/shared/nav'
 import { Footer } from '@/components/shared/footer'
+import { LocaleProvider } from '@/components/shared/LocaleProvider'
+import { getLocale } from '@/lib/locale'
 import './globals.css'
 
 const geistSans = Geist({
@@ -30,20 +32,24 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale === 'no' ? 'nb' : 'en'} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <div className="flex min-h-screen flex-col">
-            <Nav />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <LocaleProvider locale={locale}>
+            <div className="flex min-h-screen flex-col">
+              <Nav />
+              <main className="flex-1">{children}</main>
+              <Footer locale={locale} />
+            </div>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

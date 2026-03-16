@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTeams } from '@/lib/wc26'
+import { getLocale } from '@/lib/locale'
+import { dict } from '@/lib/i18n'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
@@ -9,13 +11,16 @@ export const metadata: Metadata = {
   description: 'All 48 nations competing at FIFA World Cup 2026.',
 }
 
-export default function TeamsPage() {
+export default async function TeamsPage() {
+  const locale = await getLocale()
+  const t = dict[locale].teams
+
   const teams = getTeams()
 
-  const byGroup = teams.reduce<Record<string, typeof teams>>((acc, t) => {
-    const g = t.group
+  const byGroup = teams.reduce<Record<string, typeof teams>>((acc, team) => {
+    const g = team.group
     if (!acc[g]) acc[g] = []
-    acc[g].push(t)
+    acc[g].push(team)
     return acc
   }, {})
 
@@ -25,10 +30,10 @@ export default function TeamsPage() {
     <div className="animate-fade-up mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-          Teams
+          {t.title}
         </h1>
         <p className="mt-1 text-zinc-500 dark:text-zinc-400">
-          48 nations competing at WC 2026
+          {t.subtitle}
         </p>
       </div>
 
@@ -36,7 +41,7 @@ export default function TeamsPage() {
         {sortedGroups.map((groupId) => (
           <div key={groupId}>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Group {groupId}
+              {t.group(groupId)}
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
               {byGroup[groupId].map((team) => (
@@ -49,11 +54,11 @@ export default function TeamsPage() {
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1">
                         <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {team.confederation}
+                          {t.confederation[team.confederation] ?? team.confederation}
                         </span>
                         {team.is_host && (
                           <Badge className="h-4 rounded-full bg-emerald-100 px-1.5 text-xs text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                            Host
+                            {t.host}
                           </Badge>
                         )}
                       </div>

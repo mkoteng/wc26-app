@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getTeamById, getTeamProfile, getFixtures, getTeams } from '@/lib/wc26'
+import { getTeamById, getTeamProfile, getFixtures, getTeams, getHistoricalMatchup } from '@/lib/wc26'
+import { getLocale } from '@/lib/locale'
+import { dict } from '@/lib/i18n'
 import { TeamHero } from '@/components/features/teams/TeamHero'
 import { PlayerList } from '@/components/features/teams/PlayerList'
-import { MatchCard } from '@/components/features/fixtures/MatchCard'
-
-// ── Static params — pre-render all 48 team pages at build time ───────────────
+import { MatchDetailSheet } from '@/components/features/fixtures/MatchDetailSheet'
+import type { Locale } from '@/lib/locale'
+import type { Dict } from '@/lib/i18n'
 
 export function generateStaticParams() {
   return getTeams().map((t) => ({ id: t.id }))
 }
-
-// ── Per-page metadata ─────────────────────────────────────────────────────────
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -27,8 +27,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: `${team.name} at FIFA World Cup 2026 — squad, fixtures, history, and group standings.`,
   }
 }
-
-// ── Section wrapper ───────────────────────────────────────────────────────────
 
 function Section({
   title,
@@ -49,27 +47,24 @@ function Section({
   )
 }
 
-// ── Squad & Style ─────────────────────────────────────────────────────────────
-
-function SquadSection({ teamId }: { teamId: string }) {
+function SquadSection({ teamId, t }: { teamId: string; t: Dict }) {
   const profile = getTeamProfile(teamId)
   if (!profile) {
     return (
-      <Section title="Squad & Style">
+      <Section title={t.teams.squadStyle}>
         <p className="text-sm text-zinc-400 dark:text-zinc-500">
-          Profile data not yet available.
+          {t.teams.noProfile}
         </p>
       </Section>
     )
   }
 
   return (
-    <Section title="Squad & Style">
+    <Section title={t.teams.squadStyle}>
       <div className="space-y-5">
-        {/* Coach */}
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            Head Coach
+            {t.teams.headCoach}
           </p>
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm dark:bg-zinc-800">
@@ -81,31 +76,28 @@ function SquadSection({ teamId }: { teamId: string }) {
           </div>
         </div>
 
-        {/* Key players */}
         {profile.key_players.length > 0 && (
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              Key Players
+              {t.teams.keyPlayers}
             </p>
-            <PlayerList players={profile.key_players} />
+            <PlayerList players={profile.key_players} noDataLabel={t.teams.noPlayerData} />
           </div>
         )}
 
-        {/* Playing style */}
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            Playing Style
+            {t.teams.playingStyle}
           </p>
           <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             {profile.playing_style}
           </p>
         </div>
 
-        {/* Qualifying */}
         {profile.qualifying_summary && (
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              Qualification
+              {t.teams.qualification}
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {profile.qualifying_summary}
@@ -117,9 +109,7 @@ function SquadSection({ teamId }: { teamId: string }) {
   )
 }
 
-// ── World Cup History ─────────────────────────────────────────────────────────
-
-function HistorySection({ teamId }: { teamId: string }) {
+function HistorySection({ teamId, t }: { teamId: string; t: Dict }) {
   const profile = getTeamProfile(teamId)
   if (!profile?.world_cup_history) return null
 
@@ -127,27 +117,18 @@ function HistorySection({ teamId }: { teamId: string }) {
   const hasTitles = titles > 0
 
   const stats = [
-    {
-      value: String(appearances),
-      label: 'Appearances',
-      accent: false,
-    },
+    { value: String(appearances), label: t.teams.appearances, accent: false },
     {
       value: String(titles),
-      label: titles === 1 ? 'Title' : 'Titles',
+      label: titles === 1 ? t.teams.title_one : t.teams.title_many,
       accent: hasTitles,
       icon: hasTitles ? '🏆' : undefined,
     },
-    {
-      value: best_result,
-      label: 'Best Result',
-      accent: false,
-      small: true,
-    },
+    { value: best_result, label: t.teams.bestResult, accent: false, small: true },
   ]
 
   return (
-    <Section title="World Cup History">
+    <Section title={t.teams.wcHistory}>
       <div className="grid grid-cols-3 gap-3">
         {stats.map((s) => (
           <div
@@ -175,28 +156,34 @@ function HistorySection({ teamId }: { teamId: string }) {
 
       {appearances === 0 && (
         <p className="mt-3 text-center text-xs text-zinc-400 dark:text-zinc-500">
-          First World Cup appearance
+          {t.teams.firstAppearance}
         </p>
       )}
     </Section>
   )
 }
 
-// ── Upcoming matches ──────────────────────────────────────────────────────────
-
-function UpcomingMatchesSection({ teamId }: { teamId: string }) {
+function UpcomingMatchesSection({ teamId, t }: { teamId: string; t: Dict }) {
   const fixtures = getFixtures({ team: teamId }).slice(0, 3)
 
   return (
-    <Section title="Fixtures">
+    <Section title={t.teams.fixtures}>
       {fixtures.length === 0 ? (
         <p className="text-sm text-zinc-400 dark:text-zinc-500">
-          No fixtures found.
+          {t.teams.noFixtures}
         </p>
       ) : (
         <div className="space-y-2.5">
           {fixtures.map((f) => (
-            <MatchCard key={f.id} fixture={f} />
+            <MatchDetailSheet
+              key={f.id}
+              fixture={f}
+              matchup={
+                f.home && f.away
+                  ? getHistoricalMatchup(f.home.id, f.away.id)
+                  : undefined
+              }
+            />
           ))}
         </div>
       )}
@@ -205,31 +192,28 @@ function UpcomingMatchesSection({ teamId }: { teamId: string }) {
           href={`/fixtures?team=${teamId}`}
           className="text-sm font-medium text-emerald-600 transition-colors hover:underline dark:text-emerald-500"
         >
-          View all fixtures →
+          {t.teams.viewAllFixtures}
         </Link>
       </div>
     </Section>
   )
 }
 
-// ── Head-to-Head stub ─────────────────────────────────────────────────────────
-
-function HeadToHeadSection({ teamId }: { teamId: string }) {
+function HeadToHeadSection({ teamId, t }: { teamId: string; t: Dict }) {
   const team = getTeamById(teamId)
 
   return (
-    <Section title="Head-to-Head">
+    <Section title={t.teams.h2h}>
       <div className="flex flex-col items-center gap-3 py-2 text-center">
         <span className="text-3xl">⚔️</span>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Historical match records coming soon.
+          {t.teams.h2hComingSoon}
         </p>
-        {/* Stub — will link to /teams/[id]/h2h once implemented */}
         <span
           aria-disabled
           className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
         >
-          View {team?.name} history
+          {t.teams.viewHistory(team?.name ?? '')}
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -245,17 +229,17 @@ function HeadToHeadSection({ teamId }: { teamId: string }) {
   )
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────────
-
 export default async function TeamPage({ params }: PageProps) {
   const { id } = await params
   const team = getTeamById(id)
 
   if (!team) notFound()
 
+  const locale = await getLocale()
+  const t = dict[locale]
+
   return (
     <div className="animate-fade-up mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      {/* Back link */}
       <div className="mb-5">
         <Link
           href="/groups"
@@ -270,27 +254,22 @@ export default async function TeamPage({ params }: PageProps) {
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Group {team.group}
+          {t.teams.backTo(team.group)}
         </Link>
       </div>
 
-      {/* Hero */}
       <div className="mb-6">
-        <TeamHero team={team} />
+        <TeamHero team={team} locale={locale} />
       </div>
 
-      {/* Content grid */}
       <div className="grid gap-5 lg:grid-cols-[1fr,360px]">
-        {/* Left column */}
         <div className="space-y-5">
-          <SquadSection teamId={id} />
-          <HistorySection teamId={id} />
+          <SquadSection teamId={id} t={t} />
+          <HistorySection teamId={id} t={t} />
         </div>
-
-        {/* Right column */}
         <div className="space-y-5">
-          <UpcomingMatchesSection teamId={id} />
-          <HeadToHeadSection teamId={id} />
+          <UpcomingMatchesSection teamId={id} t={t} />
+          <HeadToHeadSection teamId={id} t={t} />
         </div>
       </div>
     </div>

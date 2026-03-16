@@ -1,58 +1,56 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { getGroupStandings } from '@/lib/wc26'
+import { getLocale } from '@/lib/locale'
+import { dict } from '@/lib/i18n'
 import { GroupTable } from '@/components/features/groups/GroupTable'
 import { GroupsGridSkeleton } from '@/components/features/groups/GroupTableSkeleton'
+import type { Locale } from '@/lib/locale'
 
 export const metadata: Metadata = {
   title: 'Group Stage',
   description: 'FIFA World Cup 2026 group stage standings — 12 groups, 48 teams.',
 }
 
-// ── Groups grid ──────────────────────────────────────────────────────────────
-
-function GroupsGrid() {
+function GroupsGrid({ locale }: { locale: Locale }) {
   const groups = getGroupStandings()
 
   return (
     <div className="stagger-children grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {groups.map((group) => (
-        <GroupTable key={group.groupId} group={group} />
+        <GroupTable key={group.groupId} group={group} locale={locale} />
       ))}
     </div>
   )
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────────
+export default async function GroupsPage() {
+  const locale = await getLocale()
+  const t = dict[locale].groups
 
-export default function GroupsPage() {
   return (
     <div className="animate-fade-up mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-          Group Stage
+          {t.title}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          12 groups &middot; 4 teams each &middot; Top 2 advance to Round of 32
+          {t.subtitle}
         </p>
       </div>
 
-      {/* Legend */}
       <div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-0.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-          Advances
+          {t.advances}
         </span>
         <span className="hidden sm:inline">
-          P = Played &middot; W = Won &middot; D = Drawn &middot; L = Lost &middot;
-          GF = Goals For &middot; GA = Goals Against &middot; GD = Goal Difference &middot; Pts = Points
+          {t.legend}
         </span>
       </div>
 
-      {/* Groups */}
       <Suspense fallback={<GroupsGridSkeleton />}>
-        <GroupsGrid />
+        <GroupsGrid locale={locale} />
       </Suspense>
     </div>
   )

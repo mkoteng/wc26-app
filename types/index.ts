@@ -4,6 +4,8 @@ export type {
   Match,
   Group,
   Venue,
+  VenueWeather,
+  VenueFilter,
   MatchRound,
   MatchStatus,
   MatchFilter,
@@ -74,7 +76,7 @@ export interface TodayScoresResponse {
   error?: string
 }
 
-import type { Team as _Team, MatchRound as _MatchRound, MatchStatus as _MatchStatus } from 'wc26-mcp/types'
+import type { Team as _Team, MatchRound as _MatchRound, MatchStatus as _MatchStatus, Venue as _Venue } from 'wc26-mcp/types'
 
 // Group standings (derived)
 export interface GroupStanding {
@@ -126,4 +128,10 @@ export interface MatchFixture {
   awayPlaceholder?: string
   homeScore?: number
   awayScore?: number
+}
+
+// Venue enriched with its scheduled match list
+export interface VenueWithMatches extends _Venue {
+  matchCount: number
+  matches: MatchFixture[]
 }

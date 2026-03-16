@@ -41,7 +41,7 @@ function StatusBadge({ fixture }: { fixture: MatchFixture }) {
   }).format(new Date(fixture.utcDateTime))
 
   return (
-    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+    <span suppressHydrationWarning className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
       {localTime}
     </span>
   )

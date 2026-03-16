@@ -14,6 +14,9 @@ import { teamProfiles } from '../node_modules/wc26-mcp/dist/data/team-profiles.j
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { venues } from '../node_modules/wc26-mcp/dist/data/venues.js'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { historicalMatchups } from '../node_modules/wc26-mcp/dist/data/historical-matchups.js'
 
 import type {
   Team,
@@ -26,6 +29,7 @@ import type {
   MatchFixture,
   GroupStanding,
   GroupStandingTable,
+  HistoricalMatchup,
 } from '@/types/index'
 
 export function getTeams(filter?: TeamFilter): Team[] {
@@ -58,6 +62,7 @@ export function getMatches(filter?: MatchFilter): Match[] {
       (m) => m.home_team_id === filter.team || m.away_team_id === filter.team
     )
   }
+  if (filter?.venue) result = result.filter((m) => m.venue_id === filter.venue)
   if (filter?.group) result = result.filter((m) => m.group === filter.group)
   if (filter?.round) result = result.filter((m) => m.round === filter.round)
   if (filter?.status) result = result.filter((m) => m.status === filter.status)
@@ -78,6 +83,10 @@ export function getUpcomingMatches(limit = 10): Match[] {
   return matches
     .filter((m) => m.date >= today && m.status === 'scheduled')
     .slice(0, limit)
+}
+
+export function getVenues(): Venue[] {
+  return venues as Venue[]
 }
 
 export function getVenueById(id: string): Venue | undefined {
@@ -112,6 +121,14 @@ function enrichMatch(m: Match): MatchFixture {
 
 export function getFixtures(filter?: MatchFilter): MatchFixture[] {
   return getMatches(filter).map(enrichMatch)
+}
+
+export function getHistoricalMatchup(teamAId: string, teamBId: string): HistoricalMatchup | undefined {
+  return (historicalMatchups as HistoricalMatchup[]).find(
+    (m) =>
+      (m.team_a === teamAId && m.team_b === teamBId) ||
+      (m.team_a === teamBId && m.team_b === teamAId)
+  )
 }
 
 export function getGroupStandings(): GroupStandingTable[] {

@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
+import { useT } from '@/components/shared/LocaleProvider'
 import {
   Sheet,
   SheetContent,
@@ -13,17 +15,19 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 
-const links = [
-  { href: '/', label: 'Matches' },
-  { href: '/fixtures', label: 'Fixtures' },
-  { href: '/groups', label: 'Groups' },
-  { href: '/teams', label: 'Teams' },
-]
-
 export function Nav() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const t = useT()
+
+  const links = [
+    { href: '/', label: t.nav.matches },
+    { href: '/fixtures', label: t.nav.fixtures },
+    { href: '/groups', label: t.nav.groups },
+    { href: '/venues', label: t.nav.venues },
+    { href: '/teams', label: t.nav.teams },
+  ]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -78,7 +82,8 @@ export function Nav() {
         </nav>
 
         {/* Right controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <LanguageToggle />
           <ThemeToggle />
 
           {/* Mobile hamburger */}

@@ -2,17 +2,18 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { withCache } from '@/lib/cache'
 import { fetchTodayMatches } from '@/lib/football-data'
-import { getFixtures } from '@/lib/wc26'
-import { getTeams } from '@/lib/wc26'
+import { getFixtures, getTeams } from '@/lib/wc26'
+import { getLocale, dateLocale } from '@/lib/locale'
+import { dict } from '@/lib/i18n'
 import { TodayScores, TodayScoresSkeleton } from '@/components/features/scores/TodayScores'
 import { MatchCard } from '@/components/features/fixtures/MatchCard'
 import { MatchCardSkeleton } from '@/components/features/fixtures/MatchCardSkeleton'
 import type { TodayScoresResponse, LiveScore } from '@/types/index'
+import type { Dict } from '@/lib/i18n'
 
 // ── Live scores server fetch ─────────────────────────────────────────────────
 
 async function getTodayScores(): Promise<TodayScoresResponse> {
-  // No API key → return empty gracefully
   if (!process.env.FOOTBALL_DATA_API_KEY) {
     return { matches: [], count: 0, cachedAt: new Date().toISOString() }
   }
@@ -46,12 +47,12 @@ async function getTodayScores(): Promise<TodayScoresResponse> {
 
 // ── "No matches today" empty state ───────────────────────────────────────────
 
-function NoMatchesToday() {
+function NoMatchesToday({ t, dl }: { t: Dict; dl: string }) {
   const upcoming = getFixtures({ status: 'scheduled' })
   const next = upcoming[0]
 
   const nextDateStr = next
-    ? new Date(next.date + 'T12:00:00Z').toLocaleDateString('en-US', {
+    ? new Date(next.date + 'T12:00:00Z').toLocaleDateString(dl, {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
@@ -62,10 +63,10 @@ function NoMatchesToday() {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 py-10 text-center dark:border-zinc-800">
       <span className="text-3xl">⚽</span>
-      <p className="mt-3 font-medium text-zinc-700 dark:text-zinc-300">No matches today</p>
+      <p className="mt-3 font-medium text-zinc-700 dark:text-zinc-300">{t.home.noMatchesToday}</p>
       {nextDateStr && (
         <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
-          Next match:{' '}
+          {t.home.nextMatch}{' '}
           <Link
             href="/fixtures"
             className="font-medium text-emerald-600 hover:underline dark:text-emerald-500"
@@ -80,16 +81,15 @@ function NoMatchesToday() {
 
 // ── Upcoming section ─────────────────────────────────────────────────────────
 
-function UpcomingMatches() {
+function UpcomingMatches({ t, dl }: { t: Dict; dl: string }) {
   const fixtures = getFixtures({ status: 'scheduled' }).slice(0, 5)
 
   if (fixtures.length === 0) {
     return (
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">No upcoming matches.</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.home.noUpcoming}</p>
     )
   }
 
-  // Group by date for subtle date separators
   let lastDate = ''
 
   return (
@@ -97,7 +97,7 @@ function UpcomingMatches() {
       {fixtures.map((f) => {
         const showDate = f.date !== lastDate
         lastDate = f.date
-        const dateLabel = new Date(f.date + 'T12:00:00Z').toLocaleDateString('en-US', {
+        const dateLabel = new Date(f.date + 'T12:00:00Z').toLocaleDateString(dl, {
           weekday: 'short',
           month: 'short',
           day: 'numeric',
@@ -120,8 +120,7 @@ function UpcomingMatches() {
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
 
-function Hero() {
-  // Days until tournament start
+function Hero({ t }: { t: Dict }) {
   const start = new Date('2026-06-11T00:00:00Z')
   const now = new Date()
   const daysUntil = Math.max(0, Math.ceil((start.getTime() - now.getTime()) / 86_400_000))
@@ -129,7 +128,6 @@ function Hero() {
 
   return (
     <div className="relative mb-12 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900 sm:py-14">
-      {/* Subtle background pattern */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.12),transparent)]"
@@ -143,17 +141,16 @@ function Hero() {
           USA &middot; Canada &middot; Mexico
         </h1>
         <p className="mt-3 text-base text-zinc-500 dark:text-zinc-400">
-          11 June – 19 July 2026 &nbsp;&middot;&nbsp; 48 Teams &nbsp;&middot;&nbsp; 104 Matches
+          {t.home.subtitle}
         </p>
 
-        {/* Countdown / live indicator */}
         {!tournamentLive && daysUntil > 0 && (
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 dark:border-zinc-700 dark:bg-zinc-800">
             <span className="text-xl font-extrabold tabular-nums text-zinc-900 dark:text-white">
               {daysUntil}
             </span>
             <span className="text-sm text-zinc-500 dark:text-zinc-400">
-              {daysUntil === 1 ? 'day' : 'days'} to go
+              {t.home.daysToGo(daysUntil)}
             </span>
           </div>
         )}
@@ -161,7 +158,7 @@ function Hero() {
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
             <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-              Tournament is live
+              {t.home.tournamentLive}
             </span>
           </div>
         )}
@@ -171,13 +168,13 @@ function Hero() {
             href="/fixtures"
             className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
           >
-            Full Schedule
+            {t.home.fullSchedule}
           </Link>
           <Link
             href="/groups"
             className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
-            Group Stage
+            {t.home.groupStage}
           </Link>
         </div>
       </div>
@@ -187,12 +184,12 @@ function Hero() {
 
 // ── Quick nav cards ───────────────────────────────────────────────────────────
 
-function QuickLinks() {
+function QuickLinks({ t }: { t: Dict }) {
   const items = [
-    { href: '/fixtures', label: 'Schedule', desc: '104 matches', icon: '📅' },
-    { href: '/groups', label: 'Groups', desc: '12 groups', icon: '🏆' },
-    { href: '/teams', label: 'Teams', desc: '48 nations', icon: '🌍' },
-    { href: '/fixtures?round=Final', label: 'Final', desc: '19 Jul · MetLife', icon: '🥇' },
+    { href: '/fixtures', label: t.home.quickLinks.schedule, desc: t.home.quickLinks.scheduleDesc, icon: '📅' },
+    { href: '/groups', label: t.home.quickLinks.groups, desc: t.home.quickLinks.groupsDesc, icon: '🏆' },
+    { href: '/teams', label: t.home.quickLinks.teams, desc: t.home.quickLinks.teamsDesc, icon: '🌍' },
+    { href: '/fixtures?round=Final', label: t.home.quickLinks.final, desc: t.home.quickLinks.finalDesc, icon: '🥇' },
   ]
 
   return (
@@ -215,23 +212,27 @@ function QuickLinks() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
+  const locale = await getLocale()
+  const t = dict[locale]
+  const dl = dateLocale(locale)
+
   const todayScores = await getTodayScores()
   const hasMatchesToday = todayScores.matches.length > 0
 
   return (
     <div className="animate-fade-up mx-auto max-w-5xl px-4 py-8 sm:px-6">
-      <Hero />
+      <Hero t={t} />
 
       <div className="grid gap-8 lg:grid-cols-[1fr,1fr]">
         {/* Today's matches */}
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-              Today&rsquo;s Matches
+              {t.home.todaysMatches}
             </h2>
             {hasMatchesToday && (
               <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                {todayScores.count} match{todayScores.count !== 1 ? 'es' : ''}
+                {t.home.match(todayScores.count)}
               </span>
             )}
           </div>
@@ -240,7 +241,7 @@ export default async function HomePage() {
             {hasMatchesToday ? (
               <TodayScores initialMatches={todayScores.matches} />
             ) : (
-              <NoMatchesToday />
+              <NoMatchesToday t={t} dl={dl} />
             )}
           </Suspense>
         </section>
@@ -248,12 +249,12 @@ export default async function HomePage() {
         {/* Upcoming */}
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Upcoming</h2>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{t.home.upcoming}</h2>
             <Link
               href="/fixtures"
               className="text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-500"
             >
-              All fixtures →
+              {t.home.allFixtures}
             </Link>
           </div>
 
@@ -264,12 +265,12 @@ export default async function HomePage() {
               </div>
             }
           >
-            <UpcomingMatches />
+            <UpcomingMatches t={t} dl={dl} />
           </Suspense>
         </section>
       </div>
 
-      <QuickLinks />
+      <QuickLinks t={t} />
     </div>
   )
 }

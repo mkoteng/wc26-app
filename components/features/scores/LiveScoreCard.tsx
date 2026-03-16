@@ -80,7 +80,7 @@ function MinuteBadge({ match }: { match: LiveScore }) {
   }).format(new Date(match.utcDate))
 
   return (
-    <span className="text-xs font-medium tabular-nums text-zinc-500 dark:text-zinc-400">
+    <span suppressHydrationWarning className="text-xs font-medium tabular-nums text-zinc-500 dark:text-zinc-400">
       {localTime}
     </span>
   )

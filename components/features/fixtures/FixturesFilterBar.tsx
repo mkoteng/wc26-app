@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
+import { useT } from '@/components/shared/LocaleProvider'
 
 const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const
 
@@ -13,6 +14,7 @@ interface FixturesFilterBarProps {
 export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useT()
 
   const updateParams = useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -31,37 +33,39 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
 
   return (
     <div className="space-y-3">
-      {/* Group filter pills */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={() => updateParams({ group: undefined })}
-          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            !activeGroup
-              ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
-              : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
-          }`}
-        >
-          All
-        </button>
-        {GROUPS.map((g) => (
+      {/* Group filter pills — scrollable on mobile, wrapping on desktop */}
+      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-1.5 sm:flex-wrap" style={{ width: 'max-content' }}>
           <button
-            key={g}
-            onClick={() => updateParams({ group: activeGroup === g ? undefined : g })}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              activeGroup === g
+            onClick={() => updateParams({ group: undefined })}
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              !activeGroup
                 ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
                 : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
             }`}
           >
-            {g}
+            {t.fixtures.allGroups}
           </button>
-        ))}
+          {GROUPS.map((g) => (
+            <button
+              key={g}
+              onClick={() => updateParams({ group: activeGroup === g ? undefined : g })}
+              className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeGroup === g
+                  ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
+                  : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {t.fixtures.group(g)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Date filter */}
       <div className="flex items-center gap-2">
         <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400" htmlFor="date-filter">
-          Date
+          {t.fixtures.date}
         </label>
         <input
           id="date-filter"
@@ -77,7 +81,7 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
             onClick={() => updateParams({ date: undefined })}
             className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
           >
-            Clear
+            {t.fixtures.clear}
           </button>
         )}
       </div>

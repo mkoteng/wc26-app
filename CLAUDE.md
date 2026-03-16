@@ -143,8 +143,8 @@ export async function GET() {
 FOOTBALL_DATA_API_KEY=
 
 # Upstash Redis — https://console.upstash.com
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
 ```
 
 Never hardcode these. Always read from `process.env`. If a key is missing,

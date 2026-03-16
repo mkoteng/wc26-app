@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { getGroupStandings } from '@/lib/wc26'
 import { GroupTable } from '@/components/features/groups/GroupTable'
 import { GroupsGridSkeleton } from '@/components/features/groups/GroupTableSkeleton'
+
+export const metadata: Metadata = {
+  title: 'Group Stage',
+  description: 'FIFA World Cup 2026 group stage standings — 12 groups, 48 teams.',
+}
 
 // ── Groups grid ──────────────────────────────────────────────────────────────
 
@@ -9,7 +15,7 @@ function GroupsGrid() {
   const groups = getGroupStandings()
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="stagger-children grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {groups.map((group) => (
         <GroupTable key={group.groupId} group={group} />
       ))}
@@ -21,7 +27,7 @@ function GroupsGrid() {
 
 export default function GroupsPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="animate-fade-up mx-auto max-w-7xl px-4 py-8 sm:px-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">

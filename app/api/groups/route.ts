@@ -7,9 +7,14 @@ import { getGroupStandings } from '@/lib/wc26'
 export const revalidate = 60
 
 export async function GET() {
-  const groups = getGroupStandings()
-  return NextResponse.json(
-    { groups, count: groups.length },
-    { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' } }
-  )
+  try {
+    const groups = getGroupStandings()
+    return NextResponse.json(
+      { groups, count: groups.length },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' } }
+    )
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Internal server error'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

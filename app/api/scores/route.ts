@@ -7,22 +7,28 @@ import type { TodayScoresResponse, LiveScore } from '@/types/index'
 const CACHE_KEY = 'scores:today'
 const CACHE_TTL = 60 // seconds
 
-/** Match football-data.org TLA codes → wc26-mcp flag emojis. */
-function enrichWithFlags(matches: LiveScore[]): LiveScore[] {
+/** Match football-data.org TLA codes → wc26-mcp flag emoji + team id. */
+function enrichMatches(matches: LiveScore[]): LiveScore[] {
   const teams = getTeams()
-  const flagByCode = new Map(teams.map((t) => [t.code.toUpperCase(), t.flag_emoji]))
+  const byCode = new Map(teams.map((t) => [t.code.toUpperCase(), t]))
 
-  return matches.map((m) => ({
-    ...m,
-    homeTeam: {
-      ...m.homeTeam,
-      flagEmoji: flagByCode.get(m.homeTeam.tla.toUpperCase()) ?? '🏳',
-    },
-    awayTeam: {
-      ...m.awayTeam,
-      flagEmoji: flagByCode.get(m.awayTeam.tla.toUpperCase()) ?? '🏳',
-    },
-  }))
+  return matches.map((m) => {
+    const homeWc26 = byCode.get(m.homeTeam.tla.toUpperCase())
+    const awayWc26 = byCode.get(m.awayTeam.tla.toUpperCase())
+    return {
+      ...m,
+      homeTeam: {
+        ...m.homeTeam,
+        flagEmoji: homeWc26?.flag_emoji ?? '🏳',
+        wc26Id: homeWc26?.id,
+      },
+      awayTeam: {
+        ...m.awayTeam,
+        flagEmoji: awayWc26?.flag_emoji ?? '🏳',
+        wc26Id: awayWc26?.id,
+      },
+    }
+  })
 }
 
 export async function GET() {
@@ -42,7 +48,7 @@ export async function GET() {
       CACHE_KEY,
       async () => {
         const result = await fetchTodayMatches()
-        return { ...result, matches: enrichWithFlags(result.matches) }
+        return { ...result, matches: enrichMatches(result.matches) }
       },
       CACHE_TTL
     )
@@ -58,7 +64,6 @@ export async function GET() {
       cachedAt: new Date().toISOString(),
       error: message,
     }
-    // Return 200 with error payload so the UI can degrade gracefully
-    return NextResponse.json(fallback)
+    return NextResponse.json(fallback, { status: 500 })
   }
 }

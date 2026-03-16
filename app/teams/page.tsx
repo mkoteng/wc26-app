@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import { getTeams } from '@/lib/wc26'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Teams',
+  description: 'All 48 nations competing at FIFA World Cup 2026.',
+}
 
 export default function TeamsPage() {
   const teams = getTeams()
@@ -16,7 +22,7 @@ export default function TeamsPage() {
   const sortedGroups = Object.keys(byGroup).sort()
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="animate-fade-up mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
           Teams
@@ -35,7 +41,7 @@ export default function TeamsPage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
               {byGroup[groupId].map((team) => (
                 <Link key={team.id} href={`/teams/${team.id}`}>
-                  <Card className="cursor-pointer rounded-xl border border-border bg-card transition-colors hover:border-emerald-500/40">
+                  <Card className="cursor-pointer rounded-xl border border-border bg-card transition-all duration-200 hover:scale-[1.02] hover:border-emerald-500/40 hover:shadow-md">
                     <CardContent className="p-4">
                       <div className="mb-2 text-3xl">{team.flag_emoji}</div>
                       <p className="text-sm font-semibold text-zinc-900 dark:text-white leading-tight">

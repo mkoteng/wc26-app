@@ -16,8 +16,18 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'WC 2026',
-  description: 'FIFA World Cup 2026 — match schedule, live scores, group standings, and team profiles',
+  title: {
+    template: '%s | WC26',
+    default: 'WC26 — FIFA World Cup 2026',
+  },
+  description:
+    'Match schedule, live scores, group standings, and team profiles for the FIFA World Cup 2026 — USA, Canada & Mexico.',
+  keywords: ['FIFA World Cup 2026', 'WC26', 'World Cup schedule', 'football', 'soccer'],
+  openGraph: {
+    title: 'WC26 — FIFA World Cup 2026',
+    description: 'Match schedule, live scores, group standings, and team profiles.',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({

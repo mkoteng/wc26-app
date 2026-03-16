@@ -44,6 +44,8 @@ export interface LiveScoreTeam {
   crest: string
   /** Injected server-side from wc26-mcp by matching tla */
   flagEmoji?: string
+  /** wc26-mcp team id — injected server-side for deep-linking to /teams/[id] */
+  wc26Id?: string
 }
 
 export interface LiveScore {

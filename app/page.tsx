@@ -19,17 +19,21 @@ async function getTodayScores(): Promise<TodayScoresResponse> {
 
   try {
     const teams = getTeams()
-    const flagByCode = new Map(teams.map((t) => [t.code.toUpperCase(), t.flag_emoji]))
+    const byCode = new Map(teams.map((t) => [t.code.toUpperCase(), t]))
 
     const result = await withCache<TodayScoresResponse>(
       'scores:today',
       async () => {
         const data = await fetchTodayMatches()
-        const enriched = data.matches.map((m: LiveScore) => ({
-          ...m,
-          homeTeam: { ...m.homeTeam, flagEmoji: flagByCode.get(m.homeTeam.tla.toUpperCase()) ?? '🏳' },
-          awayTeam: { ...m.awayTeam, flagEmoji: flagByCode.get(m.awayTeam.tla.toUpperCase()) ?? '🏳' },
-        }))
+        const enriched = data.matches.map((m: LiveScore) => {
+          const homeWc26 = byCode.get(m.homeTeam.tla.toUpperCase())
+          const awayWc26 = byCode.get(m.awayTeam.tla.toUpperCase())
+          return {
+            ...m,
+            homeTeam: { ...m.homeTeam, flagEmoji: homeWc26?.flag_emoji ?? '🏳', wc26Id: homeWc26?.id },
+            awayTeam: { ...m.awayTeam, flagEmoji: awayWc26?.flag_emoji ?? '🏳', wc26Id: awayWc26?.id },
+          }
+        })
         return { ...data, matches: enriched }
       },
       60
@@ -89,7 +93,7 @@ function UpcomingMatches() {
   let lastDate = ''
 
   return (
-    <div className="space-y-2.5">
+    <div className="stagger-children space-y-2.5">
       {fixtures.map((f) => {
         const showDate = f.date !== lastDate
         lastDate = f.date
@@ -215,7 +219,7 @@ export default async function HomePage() {
   const hasMatchesToday = todayScores.matches.length > 0
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="animate-fade-up mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <Hero />
 
       <div className="grid gap-8 lg:grid-cols-[1fr,1fr]">

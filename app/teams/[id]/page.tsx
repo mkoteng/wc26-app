@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTeamById, getTeamProfile, getFixtures, getTeams } from '@/lib/wc26'
@@ -9,6 +10,22 @@ import { MatchCard } from '@/components/features/fixtures/MatchCard'
 
 export function generateStaticParams() {
   return getTeams().map((t) => ({ id: t.id }))
+}
+
+// ── Per-page metadata ─────────────────────────────────────────────────────────
+
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
+  const team = getTeamById(id)
+  if (!team) return { title: 'Team not found' }
+  return {
+    title: team.name,
+    description: `${team.name} at FIFA World Cup 2026 — squad, fixtures, history, and group standings.`,
+  }
 }
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
@@ -183,6 +200,14 @@ function UpcomingMatchesSection({ teamId }: { teamId: string }) {
           ))}
         </div>
       )}
+      <div className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+        <Link
+          href={`/fixtures?team=${teamId}`}
+          className="text-sm font-medium text-emerald-600 transition-colors hover:underline dark:text-emerald-500"
+        >
+          View all fixtures →
+        </Link>
+      </div>
     </Section>
   )
 }
@@ -222,10 +247,6 @@ function HeadToHeadSection({ teamId }: { teamId: string }) {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
 export default async function TeamPage({ params }: PageProps) {
   const { id } = await params
   const team = getTeamById(id)
@@ -233,7 +254,7 @@ export default async function TeamPage({ params }: PageProps) {
   if (!team) notFound()
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="animate-fade-up mx-auto max-w-4xl px-4 py-8 sm:px-6">
       {/* Back link */}
       <div className="mb-5">
         <Link

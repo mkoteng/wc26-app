@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { MatchFixture } from '@/types/index'
 
 interface MatchCardProps {
@@ -60,7 +61,7 @@ function TeamSide({
   const name = team?.name ?? placeholder ?? 'TBD'
   const flag = team?.flagEmoji ?? '🏳'
 
-  return (
+  const inner = (
     <div
       className={`flex min-w-0 items-center gap-2 ${
         align === 'right' ? 'flex-row-reverse' : ''
@@ -78,6 +79,20 @@ function TeamSide({
       </span>
     </div>
   )
+
+  if (team?.id) {
+    return (
+      <Link
+        href={`/teams/${team.id}`}
+        className="min-w-0 transition-opacity hover:opacity-75"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {inner}
+      </Link>
+    )
+  }
+
+  return inner
 }
 
 export function MatchCard({ fixture }: MatchCardProps) {
@@ -94,10 +109,10 @@ export function MatchCard({ fixture }: MatchCardProps) {
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-xl border bg-white transition-colors dark:bg-zinc-900 ${
+      className={`group relative overflow-hidden rounded-xl border bg-white transition-all duration-200 dark:bg-zinc-900 ${
         isLive
           ? 'border-emerald-500/40 shadow-[0_0_0_1px_rgba(16,185,129,0.15)] dark:border-emerald-500/30'
-          : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700'
+          : 'border-zinc-200 hover:scale-[1.01] hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:hover:border-zinc-700'
       }`}
     >
       {/* Live accent bar */}

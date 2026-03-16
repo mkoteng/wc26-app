@@ -35,7 +35,7 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
       <div className="flex flex-wrap gap-1.5">
         <button
           onClick={() => updateParams({ group: undefined })}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             !activeGroup
               ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
               : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
@@ -47,7 +47,7 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
           <button
             key={g}
             onClick={() => updateParams({ group: activeGroup === g ? undefined : g })}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               activeGroup === g
                 ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-zinc-950'
                 : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'

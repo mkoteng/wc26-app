@@ -37,35 +37,22 @@ function StandingRow({
     <TableRow
       className={[
         'border-b border-zinc-100 transition-colors last:border-0 dark:border-zinc-800/60',
-        // Row hover
         'hover:bg-zinc-50 dark:hover:bg-zinc-800/40',
-        // Qualifying highlight
-        qualifies ? 'relative' : '',
+        // Emerald left-border via inset box-shadow — purely visual, zero effect on layout
+        qualifies
+          ? '[box-shadow:inset_2px_0_0_#10b981] bg-emerald-50/40 dark:bg-emerald-500/[0.04] dark:[box-shadow:inset_2px_0_0_#34d399]'
+          : '',
       ].join(' ')}
     >
-      {/* Qualifying marker — left border via a pseudo-element trick using a div cell */}
-      {qualifies && (
-        <td
-          aria-hidden
-          className="absolute left-0 top-0 h-full w-0.5 bg-emerald-500 dark:bg-emerald-400"
-        />
-      )}
-
-      {/* Position */}
-      <TableCell className="w-8 pl-4 pr-2 text-center text-xs font-bold text-zinc-400 dark:text-zinc-500 sm:pl-5">
-        <span
-          className={
-            qualifies
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : ''
-          }
-        >
+      {/* Position — col width set by <colgroup> */}
+      <TableCell className="py-2.5 pl-4 pr-2 text-center text-xs font-bold sm:pl-5">
+        <span className={qualifies ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400 dark:text-zinc-500'}>
           {position}
         </span>
       </TableCell>
 
       {/* Team */}
-      <TableCell className="min-w-0 py-2.5 pl-1">
+      <TableCell className="py-2.5 pl-1 pr-2">
         <Link
           href={`/teams/${team.id}`}
           className="group/link flex min-w-0 items-center gap-2"
@@ -82,40 +69,40 @@ function StandingRow({
         </Link>
       </TableCell>
 
-      {/* Played — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      {/* P — hidden on mobile */}
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.played}
       </TableCell>
 
-      {/* Won — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      {/* W — hidden on mobile */}
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.won}
       </TableCell>
 
-      {/* Drawn — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      {/* D — hidden on mobile */}
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.drawn}
       </TableCell>
 
-      {/* Lost — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      {/* L — hidden on mobile */}
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.lost}
       </TableCell>
 
       {/* GF — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.goalsFor}
       </TableCell>
 
       {/* GA — hidden on mobile */}
-      <TableCell className="hidden w-8 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
+      <TableCell className="hidden py-2.5 text-center text-xs tabular-nums text-zinc-500 dark:text-zinc-400 sm:table-cell">
         {standing.goalsAgainst}
       </TableCell>
 
       {/* GD — hidden on mobile */}
       <TableCell
         className={[
-          'hidden w-10 text-center text-xs font-medium tabular-nums sm:table-cell',
+          'hidden py-2.5 text-center text-xs font-medium tabular-nums sm:table-cell',
           standing.goalDifference > 0
             ? 'text-emerald-600 dark:text-emerald-400'
             : standing.goalDifference < 0
@@ -126,8 +113,8 @@ function StandingRow({
         {fmtGD(standing.goalDifference)}
       </TableCell>
 
-      {/* Points — always visible, bold */}
-      <TableCell className="w-10 pr-4 text-center text-sm font-bold tabular-nums text-zinc-900 dark:text-white sm:pr-5">
+      {/* Pts — always visible */}
+      <TableCell className="py-2.5 pr-4 text-center text-sm font-bold tabular-nums text-zinc-900 dark:text-white sm:pr-5">
         {standing.points}
       </TableCell>
     </TableRow>
@@ -149,47 +136,60 @@ export function GroupTable({ group }: GroupTableProps) {
         </span>
       </div>
 
-      <Table>
+      <Table className="table-fixed">
+        {/*
+          Explicit column widths — prevents any cell from being squeezed/cut.
+          Mobile: only # | Team | Pts columns are visible.
+          Desktop (sm+): all 10 columns are visible.
+        */}
+        <colgroup>
+          {/* # */}
+          <col className="w-9" />
+          {/* Team — takes remaining space */}
+          <col />
+          {/* P W D L GF GA — each 32px, hidden on mobile */}
+          <col className="hidden w-8 sm:table-column" />
+          <col className="hidden w-8 sm:table-column" />
+          <col className="hidden w-8 sm:table-column" />
+          <col className="hidden w-8 sm:table-column" />
+          <col className="hidden w-8 sm:table-column" />
+          <col className="hidden w-8 sm:table-column" />
+          {/* GD — 40px, hidden on mobile */}
+          <col className="hidden w-10 sm:table-column" />
+          {/* Pts */}
+          <col className="w-10" />
+        </colgroup>
+
         <TableHeader>
           <TableRow className="border-b border-zinc-100 hover:bg-transparent dark:border-zinc-800">
-            {/* # */}
-            <TableHead className="w-8 pl-4 pr-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:pl-5">
+            <TableHead className="py-2 pl-4 pr-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:pl-5">
               #
             </TableHead>
-            {/* Team */}
-            <TableHead className="pl-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <TableHead className="py-2 pl-1 pr-2 text-xs text-zinc-400 dark:text-zinc-500">
               Team
             </TableHead>
-            {/* P */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               P
             </TableHead>
-            {/* W */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               W
             </TableHead>
-            {/* D */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               D
             </TableHead>
-            {/* L */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               L
             </TableHead>
-            {/* GF */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               GF
             </TableHead>
-            {/* GA */}
-            <TableHead className="hidden w-8 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               GA
             </TableHead>
-            {/* GD */}
-            <TableHead className="hidden w-10 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
+            <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               GD
             </TableHead>
-            {/* Pts */}
-            <TableHead className="w-10 pr-4 text-center text-xs font-bold text-zinc-500 dark:text-zinc-400 sm:pr-5">
+            <TableHead className="py-2 pr-4 text-center text-xs font-bold text-zinc-500 dark:text-zinc-400 sm:pr-5">
               Pts
             </TableHead>
           </TableRow>
@@ -210,7 +210,7 @@ export function GroupTable({ group }: GroupTableProps) {
       {/* Legend — mobile only */}
       <div className="border-t border-zinc-100 px-4 py-2 dark:border-zinc-800 sm:hidden">
         <p className="text-xs text-zinc-400 dark:text-zinc-500">
-          Showing Pts only &mdash; rotate or use a wider screen for full stats
+          Full stats on wider screens
         </p>
       </div>
     </div>

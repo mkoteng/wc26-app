@@ -1,15 +1,23 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { getFixtures } from '@/lib/wc26'
+import Link from 'next/link'
+import { getFixtures, getTeamById } from '@/lib/wc26'
 import { MatchCard } from '@/components/features/fixtures/MatchCard'
 import { FixturesFilterBar } from '@/components/features/fixtures/FixturesFilterBar'
 import { MatchListSkeleton } from '@/components/features/fixtures/MatchCardSkeleton'
 import type { MatchFixture, MatchRound } from '@/types/index'
+
+export const metadata: Metadata = {
+  title: 'Fixtures',
+  description: 'Full match schedule for FIFA World Cup 2026 — all 104 matches.',
+}
 
 interface PageProps {
   searchParams: Promise<{
     group?: string
     date?: string
     round?: string
+    team?: string
   }>
 }
 
@@ -70,7 +78,7 @@ function FixturesList({
               {byDate[date].length} match{byDate[date].length !== 1 ? 'es' : ''}
             </span>
           </div>
-          <div className="space-y-2.5">
+          <div className="stagger-children space-y-2.5">
             {byDate[date].map((fixture) => (
               <MatchCard key={fixture.id} fixture={fixture} />
             ))}
@@ -88,17 +96,20 @@ export default async function FixturesPage({ searchParams }: PageProps) {
   const group = params.group
   const date = params.date
   const round = params.round as MatchRound | undefined
+  const teamId = params.team
 
   const fixtures = getFixtures({
     group: group ?? undefined,
     date: date ?? undefined,
     round: round ?? undefined,
+    team: teamId ?? undefined,
   })
 
   const totalCount = getFixtures().length
+  const teamFilter = teamId ? getTeamById(teamId) : undefined
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <div className="animate-fade-up mx-auto max-w-3xl px-4 py-8 sm:px-6">
       {/* Page header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -111,6 +122,22 @@ export default async function FixturesPage({ searchParams }: PageProps) {
         </p>
       </div>
 
+      {/* Team filter banner */}
+      {teamFilter && (
+        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
+          <span className="text-lg leading-none">{teamFilter.flag_emoji}</span>
+          <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+            {teamFilter.name}
+          </span>
+          <Link
+            href="/fixtures"
+            className="ml-auto text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+          >
+            Clear ×
+          </Link>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="mb-8">
         <Suspense fallback={null}>
@@ -121,7 +148,7 @@ export default async function FixturesPage({ searchParams }: PageProps) {
       {/* Match list */}
       <Suspense
         fallback={<MatchListSkeleton count={6} />}
-        key={`${group ?? ''}-${date ?? ''}-${round ?? ''}`}
+        key={`${group ?? ''}-${date ?? ''}-${round ?? ''}-${teamId ?? ''}`}
       >
         <FixturesList fixtures={fixtures} />
       </Suspense>

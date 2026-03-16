@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { LiveScore } from '@/types/index'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -87,18 +88,16 @@ function MinuteBadge({ match }: { match: LiveScore }) {
 
 function TeamRow({
   team,
-  score,
   align,
   isWinner,
 }: {
   team: LiveScore['homeTeam']
-  score: number | null
   align: 'left' | 'right'
   isWinner: boolean
 }) {
   const flag = team.flagEmoji ?? '🏳'
 
-  return (
+  const inner = (
     <div
       className={`flex min-w-0 items-center gap-2.5 ${
         align === 'right' ? 'flex-row-reverse' : ''
@@ -118,6 +117,19 @@ function TeamRow({
       </div>
     </div>
   )
+
+  if (team.wc26Id) {
+    return (
+      <Link
+        href={`/teams/${team.wc26Id}`}
+        className="min-w-0 transition-opacity hover:opacity-75"
+      >
+        {inner}
+      </Link>
+    )
+  }
+
+  return inner
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -162,7 +174,6 @@ export function LiveScoreCard({ match }: LiveScoreCardProps) {
         <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-3">
           <TeamRow
             team={match.homeTeam}
-            score={homeScore}
             align="left"
             isWinner={homeWon}
           />
@@ -183,7 +194,6 @@ export function LiveScoreCard({ match }: LiveScoreCardProps) {
           <div className="flex justify-end">
             <TeamRow
               team={match.awayTeam}
-              score={awayScore}
               align="right"
               isWinner={awayWon}
             />

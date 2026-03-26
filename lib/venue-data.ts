@@ -42,6 +42,26 @@ export const VENUE_DETAILS: Record<string, { surface: string; roof: string }> = 
   bc_place:      { surface: 'FieldTurf',      roof: 'Retractable' },
 }
 
+/** Local image paths under /public/venues/ — pre-downloaded from Wikipedia. */
+export const VENUE_IMAGE_PATH: Record<string, string> = {
+  metlife:       '/venues/metlife.jpg',
+  sofi:          '/venues/sofi.jpg',
+  att:           '/venues/att.jpg',
+  hard_rock:     '/venues/hard_rock.jpg',
+  mercedes_benz: '/venues/mercedes_benz.jpg',
+  gillette:      '/venues/gillette.jpg',
+  nrg:           '/venues/nrg.jpg',
+  arrowhead:     '/venues/arrowhead.jpg',
+  lincoln:       '/venues/lincoln.jpg',
+  levis:         '/venues/levis.jpg',
+  lumen:         '/venues/lumen.jpg',
+  azteca:        '/venues/azteca.jpg',
+  akron:         '/venues/akron.jpg',
+  bbva:          '/venues/bbva.jpg',
+  bmo:           '/venues/bmo.png',
+  bc_place:      '/venues/bc_place.jpg',
+}
+
 export const COUNTRY_FLAG: Record<string, string> = {
   USA:    '🇺🇸',
   Mexico: '🇲🇽',

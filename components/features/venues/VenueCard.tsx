@@ -69,7 +69,7 @@ export function VenueCard({ venue, imageUrl }: VenueCardProps) {
 
         {/* Notable */}
         {venue.notable.length > 0 && (
-          <p className="mt-2.5 line-clamp-1 text-xs text-emerald-600 dark:text-emerald-500">
+          <p className="mt-2.5 line-clamp-1 text-xs text-pitch">
             {venue.notable[0]}
           </p>
         )}

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useT } from '@/components/shared/LocaleProvider'
 import type { MatchFixture } from '@/types/index'
 
 interface MatchCardProps {
@@ -10,8 +11,8 @@ interface MatchCardProps {
 function StatusBadge({ fixture }: { fixture: MatchFixture }) {
   if (fixture.status === 'live') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-pitch/15 px-2.5 py-0.5 text-xs font-semibold text-pitch dark:bg-pitch/20">
+        <span className="animate-pitch-pulse h-1.5 w-1.5 rounded-full bg-pitch" />
         LIVE
       </span>
     )
@@ -96,6 +97,7 @@ function TeamSide({
 }
 
 export function MatchCard({ fixture }: MatchCardProps) {
+  const t = useT()
   const isCompleted = fixture.status === 'completed'
   const isLive = fixture.status === 'live'
   const hasScore = isCompleted || isLive
@@ -105,19 +107,25 @@ export function MatchCard({ fixture }: MatchCardProps) {
   const homeWon = isCompleted && homeScore > awayScore
   const awayWon = isCompleted && awayScore > homeScore
 
-  const groupOrRound = fixture.group ? `Group ${fixture.group}` : fixture.round
+  const groupOrRound = fixture.group
+    ? t.fixtures.group(fixture.group)
+    : (t.rounds[fixture.round] ?? fixture.round)
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-xl border bg-white transition-all duration-200 dark:bg-zinc-900 ${
+      className={`hover-lift group relative overflow-hidden rounded-xl border bg-white dark:bg-zinc-900 ${
         isLive
-          ? 'border-emerald-500/40 shadow-[0_0_0_1px_rgba(16,185,129,0.15)] dark:border-emerald-500/30'
-          : 'border-zinc-200 hover:scale-[1.01] hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:hover:border-zinc-700'
+          ? 'border-pitch/40 glow-pitch dark:border-pitch/30'
+          : 'border-zinc-200 dark:border-zinc-800'
       }`}
     >
       {/* Live accent bar */}
       {isLive && (
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400" />
+        <div className="absolute inset-x-0 top-0 h-0.5 animate-pitch-shimmer" />
+      )}
+      {/* Completed — gold shimmer bar */}
+      {isCompleted && (
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
       )}
 
       <div className="p-4">
@@ -142,7 +150,9 @@ export function MatchCard({ fixture }: MatchCardProps) {
           {/* Score / separator */}
           <div className="flex flex-col items-center justify-center">
             {hasScore ? (
-              <span className="tabular-nums text-xl font-extrabold leading-none tracking-tight text-zinc-900 dark:text-white">
+              <span className={`tabular-nums text-xl font-extrabold leading-none tracking-tight ${
+                isCompleted ? 'text-gold' : 'text-zinc-900 dark:text-white'
+              }`}>
                 {homeScore}&thinsp;–&thinsp;{awayScore}
               </span>
             ) : (

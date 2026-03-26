@@ -43,7 +43,7 @@ export function TeamHero({ team, locale }: TeamHeroProps) {
           )}
 
           {team.is_host && (
-            <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white dark:bg-emerald-500 dark:text-zinc-950">
+            <span className="rounded-full bg-pitch px-3 py-1 text-xs font-bold text-white dark:text-zinc-950">
               {t.hostNation}
             </span>
           )}

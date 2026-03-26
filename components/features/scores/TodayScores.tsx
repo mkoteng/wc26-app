@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { LiveScoreCard } from '@/components/features/scores/LiveScoreCard'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useT } from '@/components/shared/LocaleProvider'
 import type { LiveScore, TodayScoresResponse } from '@/types/index'
 
 const POLL_INTERVAL = 60_000 // 60 seconds
@@ -41,6 +42,7 @@ function TodayScoresSkeleton() {
 }
 
 export function TodayScores({ initialMatches }: TodayScoresProps) {
+  const t = useT()
   const [matches, setMatches] = useState<LiveScore[]>(initialMatches)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
@@ -85,12 +87,12 @@ export function TodayScores({ initialMatches }: TodayScoresProps) {
         {isRefreshing ? (
           <span className="inline-flex items-center gap-1">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400 dark:bg-zinc-600" />
-            Updating…
+            {t.scores.updating}
           </span>
         ) : lastUpdated ? (
-          `Updated ${lastUpdated.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}`
+          t.scores.updated(lastUpdated.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }))
         ) : (
-          'Live · updates every 60s'
+          t.scores.live
         )}
       </p>
     </div>

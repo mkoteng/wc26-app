@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { getVenues, getFixtures } from '@/lib/wc26'
 import { getLocale } from '@/lib/locale'
 import { dict } from '@/lib/i18n'
-import { VENUE_WIKIPEDIA_TITLES, COUNTRY_FLAG } from '@/lib/venue-data'
-import { getWikipediaImage } from '@/lib/wikipedia'
+import { VENUE_IMAGE_PATH, COUNTRY_FLAG } from '@/lib/venue-data'
 import { VenueCard } from '@/components/features/venues/VenueCard'
 import type { VenueWithMatches } from '@/types/index'
 import type { Dict } from '@/lib/i18n'
@@ -69,14 +68,9 @@ export default async function VenuesPage() {
     return { ...venue, matchCount: matches.length, matches }
   })
 
-  const imageEntries = await Promise.all(
-    venues.map(async (v) => {
-      const title = VENUE_WIKIPEDIA_TITLES[v.id] ?? v.name
-      const url = await getWikipediaImage(title)
-      return [v.id, url ?? ''] as const
-    })
+  const imageUrls = Object.fromEntries(
+    venues.map((v) => [v.id, VENUE_IMAGE_PATH[v.id] ?? ''])
   )
-  const imageUrls = Object.fromEntries(imageEntries)
 
   const sortedVenues = [...venues].sort((a, b) => {
     if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount

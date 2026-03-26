@@ -36,7 +36,7 @@ function DateHeader({ dateStr, dl }: { dateStr: string; dl: string }) {
     timeZone: 'UTC',
   })
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="flex items-baseline gap-2 border-l-2 border-gold pl-3">
       <h2 className="text-sm font-bold text-zinc-900 dark:text-white">{weekday}</h2>
       <span className="text-xs text-zinc-400 dark:text-zinc-500">{formatted}</span>
     </div>
@@ -57,7 +57,10 @@ function FixturesList({
   if (fixtures.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 py-16 text-center dark:border-zinc-800">
-        <span className="text-3xl">🔍</span>
+        <svg className="h-8 w-8 text-zinc-300 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <circle cx="11" cy="11" r="8" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+        </svg>
         <p className="mt-3 font-medium text-zinc-700 dark:text-zinc-300">{t.fixtures.noMatchesFound}</p>
         <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
           {t.fixtures.noMatchesHint}

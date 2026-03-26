@@ -24,7 +24,7 @@ export function Nav() {
   const links = [
     { href: '/', label: t.nav.matches },
     { href: '/fixtures', label: t.nav.fixtures },
-    { href: '/groups', label: t.nav.groups },
+    { href: '/groups', label: t.nav.tournament },
     { href: '/venues', label: t.nav.venues },
     { href: '/teams', label: t.nav.teams },
   ]
@@ -51,10 +51,10 @@ export function Nav() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center font-extrabold text-lg tracking-tighter"
+          className="flex items-center font-extrabold text-lg tracking-tighter transition-opacity hover:opacity-80"
         >
           <span className="text-zinc-900 dark:text-white">WC</span>
-          <span className="text-emerald-500">26</span>
+          <span className="text-gold">26</span>
         </Link>
 
         {/* Desktop links */}
@@ -74,7 +74,7 @@ export function Nav() {
               >
                 {link.label}
                 {active && (
-                  <span className="absolute bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-emerald-500" />
+                  <span className="absolute bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-gold" />
                 )}
               </Link>
             )
@@ -102,7 +102,7 @@ export function Nav() {
               <SheetHeader className="border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
                 <SheetTitle className="flex items-center font-extrabold text-lg tracking-tighter">
                   <span className="text-zinc-900 dark:text-white">WC</span>
-                  <span className="text-emerald-500">26</span>
+                  <span className="text-gold">26</span>
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-1 p-3">
@@ -116,12 +116,12 @@ export function Nav() {
                       className={[
                         'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors',
                         active
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                          ? 'bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-gold'
                           : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white',
                       ].join(' ')}
                     >
                       {active && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-gold" />
                       )}
                       {!active && <span className="h-1.5 w-1.5" />}
                       {link.label}

@@ -190,7 +190,7 @@ function UpcomingMatchesSection({ teamId, t }: { teamId: string; t: Dict }) {
       <div className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
         <Link
           href={`/fixtures?team=${teamId}`}
-          className="text-sm font-medium text-emerald-600 transition-colors hover:underline dark:text-emerald-500"
+          className="text-sm font-medium text-pitch transition-colors hover:underline"
         >
           {t.teams.viewAllFixtures}
         </Link>

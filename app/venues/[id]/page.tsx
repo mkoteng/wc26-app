@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { getVenues, getVenueById, getFixtures, getHistoricalMatchup } from '@/lib/wc26'
 import { getLocale } from '@/lib/locale'
 import { dict } from '@/lib/i18n'
-import { VENUE_WIKIPEDIA_TITLES, VENUE_DETAILS, COUNTRY_FLAG } from '@/lib/venue-data'
-import { getWikipediaImage } from '@/lib/wikipedia'
+import { VENUE_IMAGE_PATH, VENUE_DETAILS, COUNTRY_FLAG } from '@/lib/venue-data'
 import { VenueImage } from '@/components/features/venues/VenueImage'
 import { MatchDetailSheet } from '@/components/features/fixtures/MatchDetailSheet'
 import type { Dict } from '@/lib/i18n'
@@ -52,7 +51,7 @@ function InfoCell({
         className={[
           'text-sm font-semibold leading-snug',
           accent
-            ? 'text-emerald-600 dark:text-emerald-400'
+            ? 'text-pitch'
             : 'text-zinc-900 dark:text-white',
         ].join(' ')}
       >
@@ -76,14 +75,14 @@ export default async function VenuePage({ params }: PageProps) {
     a.utcDateTime.localeCompare(b.utcDateTime)
   )
 
-  const imageUrl = await getWikipediaImage(VENUE_WIKIPEDIA_TITLES[id] ?? venue.name) ?? ''
+  const imageUrl = VENUE_IMAGE_PATH[id] ?? ''
   const details = VENUE_DETAILS[id]
   const flag = COUNTRY_FLAG[venue.country] ?? ''
   const capacity = venue.capacity.toLocaleString('en-US')
 
   const juneMid = Math.round((venue.weather.june_avg_high_f + venue.weather.june_avg_low_f) / 2)
   const julyMid = Math.round((venue.weather.july_avg_high_f + venue.weather.july_avg_low_f) / 2)
-  const weatherSummary = `Jun ~${juneMid}°F · Jul ~${julyMid}°F`
+  const weatherSummary = `Jun ${t.tempFormat(juneMid)} · Jul ${t.tempFormat(julyMid)}`
 
   const coordStr = `${venue.coordinates.lat.toFixed(4)}, ${venue.coordinates.lng.toFixed(4)}`
 
@@ -104,7 +103,7 @@ export default async function VenuePage({ params }: PageProps) {
 
       {/* Hero image */}
       <div className="relative mb-6 overflow-hidden rounded-2xl">
-        <div className="aspect-[16/7] w-full">
+        <div className="relative aspect-[16/7] w-full">
           <VenueImage
             src={imageUrl}
             alt={`${venue.name} stadium`}
@@ -133,12 +132,12 @@ export default async function VenuePage({ params }: PageProps) {
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {details && (
           <>
-            <InfoCell label={t.surface} value={details.surface} />
-            <InfoCell label={t.roof} value={details.roof} />
+            <InfoCell label={t.surface} value={t.surfaceLabels[details.surface] ?? details.surface} />
+            <InfoCell label={t.roof} value={t.roofLabels[details.roof] ?? details.roof} />
           </>
         )}
         <InfoCell label={t.capacity} value={capacity} accent />
-        <InfoCell label={t.timezone} value={venue.timezone.replace('America/', '')} />
+        <InfoCell label={t.timezone} value={venue.timezone.replace('America/', '').replace(/_/g, ' ')} />
         <InfoCell label={t.coordinates} value={coordStr} />
         <InfoCell label={t.avgTemp} value={weatherSummary} />
       </div>
@@ -149,7 +148,7 @@ export default async function VenuePage({ params }: PageProps) {
           {t.weather}
         </p>
         <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          {venue.weather.description}
+          {t.weatherDescriptions[venue.weather.description] ?? venue.weather.description}
         </p>
       </div>
 
@@ -162,8 +161,8 @@ export default async function VenuePage({ params }: PageProps) {
           <ul className="space-y-2">
             {venue.notable.map((fact, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                {fact}
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-pitch" />
+                {t.notableFacts[fact] ?? fact}
               </li>
             ))}
           </ul>

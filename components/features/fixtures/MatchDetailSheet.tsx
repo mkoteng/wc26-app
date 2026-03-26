@@ -83,7 +83,7 @@ function H2HSection({
           {matchup.total_matches > 0 && (
             <>
               <div
-                className="h-full bg-emerald-500"
+                className="h-full bg-pitch"
                 style={{ width: `${(homeWins / matchup.total_matches) * 100}%` }}
               />
               <div
@@ -130,9 +130,10 @@ function H2HSection({
 interface MatchDetailSheetProps {
   fixture: MatchFixture
   matchup?: HistoricalMatchup
+  trigger?: React.ReactNode
 }
 
-export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
+export function MatchDetailSheet({ fixture, matchup, trigger }: MatchDetailSheetProps) {
   const side = useSheetSide()
   const countdown = useCountdown(fixture.utcDateTime)
   const t = useT()
@@ -158,7 +159,9 @@ export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
     hour12: false,
   }).format(new Date(fixture.utcDateTime))
 
-  const groupOrRound = fixture.group ? `Group ${fixture.group}` : fixture.round
+  const groupOrRound = fixture.group
+    ? t.fixtures.group(fixture.group)
+    : (t.rounds[fixture.round] ?? fixture.round)
 
   const homeTeam = fixture.home
   const awayTeam = fixture.away
@@ -166,6 +169,7 @@ export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
   return (
     <Sheet>
       <SheetTrigger
+        nativeButton={false}
         render={
           <div
             role="button"
@@ -174,8 +178,7 @@ export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
           />
         }
       >
-        {/* MatchCard inline — avoids prop drilling while keeping trigger wrapper */}
-        <MatchCardInner fixture={fixture} />
+        {trigger ?? <MatchCardInner fixture={fixture} />}
       </SheetTrigger>
 
       <SheetContent
@@ -192,8 +195,8 @@ export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
               Match #{fixture.matchNumber} · {groupOrRound}
             </span>
             {isLive && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-pitch/15 px-2.5 py-0.5 text-xs font-semibold text-pitch dark:bg-pitch/20">
+                <span className="animate-pitch-pulse h-1.5 w-1.5 rounded-full bg-pitch" />
                 LIVE
               </span>
             )}
@@ -330,6 +333,7 @@ export function MatchDetailSheet({ fixture, matchup }: MatchDetailSheetProps) {
 // We re-implement the card here so SheetTrigger can wrap it without prop drilling.
 
 function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
+  const t = useT()
   const isCompleted = fixture.status === 'completed'
   const isLive = fixture.status === 'live'
   const hasScore = isCompleted || isLive
@@ -339,7 +343,9 @@ function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
   const homeWon = isCompleted && homeScore > awayScore
   const awayWon = isCompleted && awayScore > homeScore
 
-  const groupOrRound = fixture.group ? `Group ${fixture.group}` : fixture.round
+  const groupOrRound = fixture.group
+    ? t.fixtures.group(fixture.group)
+    : (t.rounds[fixture.round] ?? fixture.round)
 
   const localTime = new Intl.DateTimeFormat(undefined, {
     hour: '2-digit',
@@ -351,12 +357,12 @@ function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
     <article
       className={`group relative overflow-hidden rounded-xl border bg-white transition-all duration-200 dark:bg-zinc-900 ${
         isLive
-          ? 'border-emerald-500/40 shadow-[0_0_0_1px_rgba(16,185,129,0.15)] dark:border-emerald-500/30'
+          ? 'border-pitch/40 glow-pitch dark:border-pitch/30'
           : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md dark:border-zinc-800 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50'
       }`}
     >
       {isLive && (
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400" />
+        <div className="absolute inset-x-0 top-0 h-0.5 animate-pitch-shimmer" />
       )}
       <div className="p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
@@ -365,8 +371,8 @@ function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
           </span>
           <div className="flex items-center gap-2">
             {isLive ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-pitch/15 px-2.5 py-0.5 text-xs font-semibold text-pitch dark:bg-pitch/20">
+                <span className="animate-pitch-pulse h-1.5 w-1.5 rounded-full bg-pitch" />
                 LIVE
               </span>
             ) : isCompleted ? (

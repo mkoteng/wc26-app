@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useT } from '@/components/shared/LocaleProvider'
 import type { LiveScore } from '@/types/index'
+import type { Dict } from '@/lib/i18n'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -13,13 +15,14 @@ function isFinished(status: LiveScore['status']) {
   return status === 'FINISHED' || status === 'AWARDED'
 }
 
-function groupLabel(match: LiveScore): string {
+function groupLabel(match: LiveScore, t: Dict): string {
   if (match.group) {
-    // football-data returns "GROUP_A" — prettify to "Group A"
-    return match.group.replace('GROUP_', 'Group ')
+    // football-data returns "GROUP_A" — translate to "Group A" / "Gruppe A"
+    const letter = match.group.replace('GROUP_', '')
+    return t.groups.group(letter)
   }
-  // prettify stage: "GROUP_STAGE" → "Group Stage"
-  return match.stage
+  // translate stage code via i18n, fallback to prettified string
+  return t.stages[match.stage] ?? match.stage
     .split('_')
     .map((w) => w[0] + w.slice(1).toLowerCase())
     .join(' ')
@@ -40,8 +43,8 @@ function MinuteBadge({ match }: { match: LiveScore }) {
     const min = match.minute ?? '?'
     const injury = match.injuryTime ? `+${match.injuryTime}` : ''
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-pitch/15 px-2.5 py-0.5 text-xs font-semibold text-pitch dark:bg-pitch/20">
+        <span className="animate-pitch-pulse h-1.5 w-1.5 rounded-full bg-pitch" />
         {min}{injury}&prime;
       </span>
     )
@@ -49,8 +52,8 @@ function MinuteBadge({ match }: { match: LiveScore }) {
 
   if (match.status === 'PAUSED') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-pitch/15 px-2.5 py-0.5 text-xs font-semibold text-pitch dark:bg-pitch/20">
+        <span className="animate-pitch-pulse h-1.5 w-1.5 rounded-full bg-pitch" />
         LIVE
       </span>
     )
@@ -139,6 +142,7 @@ export interface LiveScoreCardProps {
 }
 
 export function LiveScoreCard({ match }: LiveScoreCardProps) {
+  const t = useT()
   const live = isLive(match.status)
   const finished = isFinished(match.status)
   const hasScore = live || finished
@@ -150,22 +154,28 @@ export function LiveScoreCard({ match }: LiveScoreCardProps) {
 
   return (
     <article
-      className={`relative overflow-hidden rounded-xl border transition-colors ${
+      className={`hover-lift relative overflow-hidden rounded-xl border ${
         live
-          ? 'border-emerald-500/40 bg-white shadow-[0_0_0_1px_rgba(16,185,129,0.1)] dark:border-emerald-500/30 dark:bg-zinc-900'
-          : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+          ? 'border-pitch/40 bg-white glow-pitch dark:border-pitch/30 dark:bg-zinc-900'
+          : finished
+            ? 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+            : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
       }`}
     >
       {/* Live accent bar */}
       {live && (
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500" />
+        <div className="absolute inset-x-0 top-0 h-0.5 animate-pitch-shimmer" />
+      )}
+      {/* Finished — subtle gold top bar for championship feel */}
+      {finished && (
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
       )}
 
       <div className="p-4">
         {/* Header */}
         <div className="mb-3 flex items-center justify-between gap-2">
           <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-            {groupLabel(match)}
+            {groupLabel(match, t)}
           </span>
           <MinuteBadge match={match} />
         </div>
@@ -181,7 +191,11 @@ export function LiveScoreCard({ match }: LiveScoreCardProps) {
           {/* Score */}
           <div className="flex flex-col items-center">
             {hasScore ? (
-              <span className="tabular-nums text-2xl font-extrabold leading-none tracking-tight text-zinc-900 dark:text-white">
+              <span className={`tabular-nums text-2xl font-extrabold leading-none tracking-tight ${
+                finished
+                  ? 'text-gold'
+                  : 'text-zinc-900 dark:text-white'
+              }`}>
                 {homeScore ?? 0}&thinsp;–&thinsp;{awayScore ?? 0}
               </span>
             ) : (

@@ -3,8 +3,6 @@ import Link from 'next/link'
 import { getTeams } from '@/lib/wc26'
 import { getLocale } from '@/lib/locale'
 import { dict } from '@/lib/i18n'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 export const metadata: Metadata = {
   title: 'Teams',
@@ -37,38 +35,43 @@ export default async function TeamsPage() {
         </p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-10">
         {sortedGroups.map((groupId) => (
           <div key={groupId}>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              {t.group(groupId)}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
+            <div className="mb-4 flex items-center gap-3">
+              <h2 className="border-l-2 border-gold pl-3 text-base font-bold text-zinc-900 dark:text-white">
+                {t.group(groupId)}
+              </h2>
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                {byGroup[groupId].length}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {byGroup[groupId].map((team) => (
-                <Link key={team.id} href={`/teams/${team.id}`}>
-                  <Card className="cursor-pointer rounded-xl border border-border bg-card transition-all duration-200 hover:scale-[1.02] hover:border-emerald-500/40 hover:shadow-md">
-                    <CardContent className="p-4">
-                      <div className="mb-2 text-3xl">{team.flag_emoji}</div>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-white leading-tight">
-                        {team.name}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {t.confederation[team.confederation] ?? team.confederation}
-                        </span>
-                        {team.is_host && (
-                          <Badge className="h-4 rounded-full bg-emerald-100 px-1.5 text-xs text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                            {t.host}
-                          </Badge>
-                        )}
-                      </div>
-                      {team.fifa_ranking && (
-                        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-                          FIFA #{team.fifa_ranking}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                <Link
+                  key={team.id}
+                  href={`/teams/${team.id}`}
+                  className="hover-lift group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-gold/40 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-gold/30 dark:hover:shadow-black/40"
+                >
+                  {/* FIFA ranking badge */}
+                  {team.fifa_ranking && (
+                    <span className="absolute right-3 top-3 rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
+                      #{team.fifa_ranking}
+                    </span>
+                  )}
+
+                  {/* Flag */}
+                  <div className="mb-3 text-5xl leading-none">{team.flag_emoji}</div>
+
+                  {/* Name */}
+                  <p className="pr-6 text-sm font-bold leading-tight text-zinc-900 group-hover:text-gold dark:text-white dark:group-hover:text-gold">
+                    {team.name}
+                  </p>
+
+                  {/* Confederation */}
+                  <p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                    {t.confederation[team.confederation] ?? team.confederation}
+                  </p>
                 </Link>
               ))}
             </div>

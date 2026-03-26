@@ -29,12 +29,12 @@ function StandingRow({
   standing,
   position,
   qualifies,
-  hostLabel,
+  mayQualify,
 }: {
   standing: GroupStanding
   position: number
   qualifies: boolean
-  hostLabel: string
+  mayQualify: boolean
 }) {
   const { team } = standing
 
@@ -43,15 +43,27 @@ function StandingRow({
       className={[
         'border-b border-zinc-100 transition-colors last:border-0 dark:border-zinc-800/60',
         'hover:bg-zinc-50 dark:hover:bg-zinc-800/40',
-        // Emerald left-border via inset box-shadow — purely visual, zero effect on layout
-        qualifies
-          ? '[box-shadow:inset_2px_0_0_#10b981] bg-emerald-50/40 dark:bg-emerald-500/[0.04] dark:[box-shadow:inset_2px_0_0_#34d399]'
-          : '',
+        // Position 1 = gold (champion), position 2 = pitch green (qualifies), position 3 = amber (may qualify)
+        position === 1
+          ? '[box-shadow:inset_2px_0_0_var(--gold)] bg-amber-50/40 dark:bg-amber-500/[0.04]'
+          : qualifies
+            ? '[box-shadow:inset_2px_0_0_var(--pitch)] bg-pitch/[0.06] dark:bg-pitch/[0.05]'
+            : mayQualify
+              ? '[box-shadow:inset_2px_0_0_#f59e0b] bg-yellow-50/40 dark:bg-yellow-500/[0.04] dark:[box-shadow:inset_2px_0_0_#fbbf24]'
+              : '',
       ].join(' ')}
     >
       {/* Position — col width set by <colgroup> */}
       <TableCell className="py-2.5 pl-4 pr-2 text-center text-xs font-bold sm:pl-5">
-        <span className={qualifies ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400 dark:text-zinc-500'}>
+        <span className={
+          position === 1
+            ? 'text-gold font-extrabold'
+            : qualifies
+              ? 'text-pitch'
+              : mayQualify
+                ? 'text-amber-500 dark:text-amber-400'
+                : 'text-zinc-400 dark:text-zinc-500'
+        }>
           {position}
         </span>
       </TableCell>
@@ -63,14 +75,17 @@ function StandingRow({
           className="group/link flex min-w-0 items-center gap-2"
         >
           <span className="shrink-0 text-lg leading-none">{team.flag_emoji}</span>
-          <span className="truncate text-sm font-semibold text-zinc-800 group-hover/link:text-emerald-600 dark:text-zinc-200 dark:group-hover/link:text-emerald-400">
+          <span className={`truncate text-sm font-semibold dark:text-zinc-200 ${
+            position === 1
+              ? 'text-zinc-900 group-hover/link:text-gold dark:group-hover/link:text-gold'
+              : qualifies
+                ? 'text-zinc-800 group-hover/link:text-pitch'
+                : mayQualify
+                  ? 'text-zinc-800 group-hover/link:text-amber-500 dark:group-hover/link:text-amber-400'
+                  : 'text-zinc-800 group-hover/link:text-zinc-600 dark:group-hover/link:text-zinc-300'
+          }`}>
             {team.name}
           </span>
-          {team.is_host && (
-            <span className="hidden shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-semibold leading-none text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 sm:inline">
-              {hostLabel}
-            </span>
-          )}
         </Link>
       </TableCell>
 
@@ -109,7 +124,7 @@ function StandingRow({
         className={[
           'hidden py-2.5 text-center text-xs font-medium tabular-nums sm:table-cell',
           standing.goalDifference > 0
-            ? 'text-emerald-600 dark:text-emerald-400'
+            ? 'text-pitch'
             : standing.goalDifference < 0
               ? 'text-red-500 dark:text-red-400'
               : 'text-zinc-400 dark:text-zinc-500',
@@ -175,28 +190,28 @@ export function GroupTable({ group, locale }: GroupTableProps) {
               {t.teamHeader}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              P
+              {t.colP}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              W
+              {t.colW}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              D
+              {t.colD}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              L
+              {t.colL}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              GF
+              {t.colGF}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              GA
+              {t.colGA}
             </TableHead>
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
-              GD
+              {t.colGD}
             </TableHead>
             <TableHead className="py-2 pr-4 text-center text-xs font-bold text-zinc-500 dark:text-zinc-400 sm:pr-5">
-              Pts
+              {t.colPts}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -208,7 +223,7 @@ export function GroupTable({ group, locale }: GroupTableProps) {
               standing={standing}
               position={i + 1}
               qualifies={i < 2}
-              hostLabel={dict[locale].teams.host}
+              mayQualify={i === 2}
             />
           ))}
         </TableBody>

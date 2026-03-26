@@ -12,7 +12,7 @@ export default function TeamNotFound() {
       </p>
       <Link
         href="/teams"
-        className="mt-6 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+        className="mt-6 rounded-lg bg-pitch px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 dark:text-zinc-950"
       >
         All teams
       </Link>

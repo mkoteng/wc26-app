@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Error({
   error,
@@ -22,12 +23,20 @@ export default function Error({
       <p className="mt-2 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
         An unexpected error occurred. This is usually temporary — try refreshing.
       </p>
-      <button
-        onClick={reset}
-        className="mt-6 rounded-lg bg-pitch px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 dark:text-zinc-950"
-      >
-        Try again
-      </button>
+      <div className="mt-6 flex gap-3">
+        <button
+          onClick={reset}
+          className="rounded-lg bg-pitch px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 dark:text-zinc-950"
+        >
+          Try again
+        </button>
+        <Link
+          href="/"
+          className="rounded-lg border border-zinc-200 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Go home
+        </Link>
+      </div>
     </div>
   )
 }

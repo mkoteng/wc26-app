@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTeamById, getTeamProfile, getFixtures, getTeams, getHistoricalMatchup } from '@/lib/wc26'
 import { getLocale } from '@/lib/locale'
-import { dict } from '@/lib/i18n'
+import { dict, translateWcResult } from '@/lib/i18n'
 import { TeamHero } from '@/components/features/teams/TeamHero'
 import { PlayerList } from '@/components/features/teams/PlayerList'
 import { MatchDetailSheet } from '@/components/features/fixtures/MatchDetailSheet'
@@ -81,7 +81,7 @@ function SquadSection({ teamId, t }: { teamId: string; t: Dict }) {
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               {t.teams.keyPlayers}
             </p>
-            <PlayerList players={profile.key_players} noDataLabel={t.teams.noPlayerData} />
+            <PlayerList players={profile.key_players} noDataLabel={t.teams.noPlayerData} positionLabels={t.playerPositions} />
           </div>
         )}
 
@@ -113,7 +113,8 @@ function HistorySection({ teamId, t }: { teamId: string; t: Dict }) {
   const profile = getTeamProfile(teamId)
   if (!profile?.world_cup_history) return null
 
-  const { appearances, titles, best_result } = profile.world_cup_history
+  const { appearances, titles } = profile.world_cup_history
+  const best_result = translateWcResult(profile.world_cup_history.best_result, t.wcResultPrefixes)
   const hasTitles = titles > 0
 
   const stats = [
@@ -213,7 +214,7 @@ function HeadToHeadSection({ teamId, t }: { teamId: string; t: Dict }) {
           aria-disabled
           className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
         >
-          {t.teams.viewHistory(team?.name ?? '')}
+          {t.teams.viewHistory(t.teamNames[team?.name ?? ''] ?? (team?.name ?? ''))}
           <svg
             className="h-3.5 w-3.5"
             fill="none"

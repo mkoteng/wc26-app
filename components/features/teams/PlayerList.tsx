@@ -3,6 +3,7 @@ import type { KeyPlayer } from '@/types/index'
 interface PlayerListProps {
   players: KeyPlayer[]
   noDataLabel?: string
+  positionLabels?: Record<string, string>
 }
 
 const POSITION_COLORS: Record<string, string> = {
@@ -22,7 +23,7 @@ function positionColor(pos: string): string {
   return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
 }
 
-export function PlayerList({ players, noDataLabel = 'No player data available.' }: PlayerListProps) {
+export function PlayerList({ players, noDataLabel = 'No player data available.', positionLabels }: PlayerListProps) {
   if (players.length === 0) {
     return (
       <p className="text-sm text-zinc-400 dark:text-zinc-500">{noDataLabel}</p>
@@ -50,7 +51,7 @@ export function PlayerList({ players, noDataLabel = 'No player data available.' 
           <span
             className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${positionColor(player.position)}`}
           >
-            {player.position}
+            {positionLabels?.[player.position] ?? player.position}
           </span>
         </li>
       ))}

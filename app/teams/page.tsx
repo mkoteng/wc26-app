@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 
 export default async function TeamsPage() {
   const locale = await getLocale()
-  const t = dict[locale].teams
+  const d = dict[locale]
+  const t = d.teams
 
   const teams = getTeams()
 
@@ -65,7 +66,7 @@ export default async function TeamsPage() {
 
                   {/* Name */}
                   <p className="pr-6 text-sm font-bold leading-tight text-zinc-900 group-hover:text-gold dark:text-white dark:group-hover:text-gold">
-                    {team.name}
+                    {d.teamNames[team.name] ?? team.name}
                   </p>
 
                   {/* Confederation */}

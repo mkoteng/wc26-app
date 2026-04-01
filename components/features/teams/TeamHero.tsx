@@ -1,4 +1,5 @@
 import { dict } from '@/lib/i18n'
+import { FavouriteButton } from '@/components/shared/FavouriteButton'
 import type { Locale } from '@/lib/locale'
 import type { Team } from '@/types/index'
 
@@ -8,8 +9,10 @@ interface TeamHeroProps {
 }
 
 export function TeamHero({ team, locale }: TeamHeroProps) {
-  const t = dict[locale].teams
+  const d = dict[locale]
+  const t = d.teams
   const confLabel = t.confederation[team.confederation] ?? team.confederation
+  const teamName = d.teamNames[team.name] ?? team.name
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
@@ -23,9 +26,12 @@ export function TeamHero({ team, locale }: TeamHeroProps) {
           {team.flag_emoji}
         </div>
 
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
-          {team.name}
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
+            {teamName}
+          </h1>
+          <FavouriteButton teamId={team.id} teamName={teamName} size="md" />
+        </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">

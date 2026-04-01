@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { Nav } from '@/components/shared/nav'
 import { Footer } from '@/components/shared/footer'
 import { LocaleProvider } from '@/components/shared/LocaleProvider'
+import { SessionProvider } from '@/components/shared/SessionProvider'
 import { getLocale } from '@/lib/locale'
 import './globals.css'
 
@@ -46,15 +47,17 @@ export default async function RootLayout({
   return (
     <html lang={locale === 'no' ? 'nb' : 'en'} suppressHydrationWarning>
       <body className={`${firaSans.variable} ${firaCode.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LocaleProvider locale={locale}>
-            <div className="flex min-h-screen flex-col">
-              <Nav />
-              <main className="flex-1">{children}</main>
-              <Footer locale={locale} />
-            </div>
-          </LocaleProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <LocaleProvider locale={locale}>
+              <div className="flex min-h-screen flex-col">
+                <Nav />
+                <main className="flex-1">{children}</main>
+                <Footer locale={locale} />
+              </div>
+            </LocaleProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   )

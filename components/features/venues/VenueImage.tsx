@@ -1,6 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+
+// Tiny 1×1 gray GIF — prevents layout shift while image loads
+const BLUR_DATA_URL =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
 
 interface VenueImageProps {
   src: string
@@ -9,9 +14,9 @@ interface VenueImageProps {
   className?: string
 }
 
-function Fallback({ venueName, className }: { venueName: string; className: string }) {
+function Fallback({ venueName }: { venueName: string }) {
   return (
-    <div className={`flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 ${className}`}>
+    <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800">
       <div className="px-4 text-center">
         <svg
           aria-hidden
@@ -38,15 +43,18 @@ export function VenueImage({ src, alt, venueName, className = '' }: VenueImagePr
   const [errored, setErrored] = useState(false)
 
   if (!src || errored) {
-    return <Fallback venueName={venueName} className={className} />
+    return <Fallback venueName={venueName} />
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={src}
       alt={alt}
+      fill
       className={`object-cover ${className}`}
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+      placeholder="blur"
+      blurDataURL={BLUR_DATA_URL}
       onError={() => setErrored(true)}
     />
   )

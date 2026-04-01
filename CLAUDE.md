@@ -145,6 +145,12 @@ FOOTBALL_DATA_API_KEY=
 # Upstash Redis — https://console.upstash.com
 KV_REST_API_URL=
 KV_REST_API_TOKEN=
+
+# Resend — email notifications (https://resend.com)
+RESEND_API_KEY=
+
+# Public base URL (used in email links)
+NEXT_PUBLIC_BASE_URL=http://localhost:3000  # production: https://your-app.vercel.app
 ```
 
 Never hardcode these. Always read from `process.env`. If a key is missing,
@@ -186,3 +192,50 @@ Tournament dates: **11 June – 19 July 2026**
 - Do not use the `unstable_` prefix on `cacheLife`/`cacheTag`
 - Do not enable the React Compiler without being asked
 - Do not add `--turbopack` to npm scripts (it's the default in v16)
+
+---
+
+## Prediction league
+
+### Auth
+- **NextAuth v5** (next-auth@beta) with Google provider
+- Config: `/auth.ts` — exports `{ handlers, auth, signIn, signOut }`
+- Route: `/app/api/auth/[...nextauth]/route.ts`
+- Helper: `/lib/auth-helpers.ts` — `getSessionUserId()`, `requireSessionUserId()`
+- Session provider: `/components/shared/SessionProvider.tsx` (wraps root layout)
+- `/lib/auth-placeholder.ts` is deprecated — use `/auth.ts` instead
+
+### Database
+- **Drizzle ORM** + **Neon** (`@neondatabase/serverless`)
+- Schema: `/lib/db/schema.ts` — tables: `users`, `leagues`, `league_members`, `predictions`, `tournament_winner_predictions`
+- Client: `/lib/db/index.ts` — lazy singleton via `getDb()`
+- Queries: `/lib/db/queries.ts` — all type-safe DB operations
+- Migration: `npx tsx lib/db/migrate.ts` (run once against POSTGRES_URL)
+
+### Business logic
+- Deadlines: `/lib/deadlines.ts` — tournament winner deadline (11 Jun 2026), match deadline (1hr before kickoff)
+- Scoring: `/lib/scoring.ts` — 3pts exact, 1pt correct outcome, 5pts tournament winner
+- Types: `/types/predictions.ts` — `Prediction`, `TournamentWinnerPrediction`, `LeagueMember`, `LeagueStanding`
+
+### API routes (all require auth)
+- `POST /api/liga` — create league
+- `POST /api/liga/bli-med` — join league by invite code
+- `GET /api/liga/mine` — user's leagues
+- `GET /api/liga/[id]` — league details + standings
+- `POST/GET /api/liga/[id]/tips` — match predictions
+- `POST/GET /api/liga/[id]/vinner` — tournament winner prediction
+
+### Pages
+- `/liga` — overview of user's leagues
+- `/liga/opprett` — create new league
+- `/liga/bli-med` — join with invite code (?kode= pre-fill)
+- `/liga/[id]` — league detail with tabs: Tabell, Tips, Resultater
+- `/liga/[id]/inviter` — invite page with copy link
+
+### Env vars (add to Vercel dashboard)
+```
+POSTGRES_URL=          # Neon/Vercel Postgres connection string
+AUTH_SECRET=           # npx auth secret
+AUTH_GOOGLE_ID=        # Google OAuth client ID
+AUTH_GOOGLE_SECRET=    # Google OAuth client secret
+```

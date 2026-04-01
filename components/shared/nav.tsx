@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Menu } from 'lucide-react'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { LanguageToggle } from '@/components/shared/LanguageToggle'
+import { AuthButton } from '@/components/shared/AuthButton'
 import { useT } from '@/components/shared/LocaleProvider'
+import { useFavourites } from '@/hooks/useFavourites'
 import {
   Sheet,
   SheetContent,
@@ -20,14 +23,25 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const t = useT()
+  const { data: session } = useSession()
+  const isSignedIn = !!session?.user
+  const { favourites } = useFavourites()
+  const hasFavourites = favourites.length > 0
 
-  const links = [
+  const baseLinks = [
     { href: '/', label: t.nav.matches },
     { href: '/fixtures', label: t.nav.fixtures },
     { href: '/groups', label: t.nav.tournament },
     { href: '/venues', label: t.nav.venues },
     { href: '/teams', label: t.nav.teams },
+    { href: '/favourites', label: t.nav.favourites },
   ]
+
+  const links = isSignedIn
+    ? [...baseLinks, { href: '/liga', label: t.nav.liga }]
+    : [...baseLinks]
+
+  const isAdmin = session?.user?.email === 'mkoteng@gmail.com'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -59,8 +73,17 @@ export function Nav() {
 
         {/* Desktop links */}
         <nav className="hidden items-center gap-0.5 sm:flex">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="rounded-lg px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              Admin
+            </Link>
+          )}
           {links.map((link) => {
             const active = isActive(link.href)
+            const isFavourites = link.href === '/favourites'
             return (
               <Link
                 key={link.href}
@@ -73,6 +96,9 @@ export function Nav() {
                 ].join(' ')}
               >
                 {link.label}
+                {isFavourites && hasFavourites && !active && (
+                  <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-pitch" />
+                )}
                 {active && (
                   <span className="absolute bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-gold" />
                 )}
@@ -85,6 +111,7 @@ export function Nav() {
         <div className="flex items-center gap-1">
           <LanguageToggle />
           <ThemeToggle />
+          <AuthButton />
 
           {/* Mobile hamburger */}
           <Sheet open={open} onOpenChange={setOpen}>
@@ -108,6 +135,7 @@ export function Nav() {
               <nav className="flex flex-col gap-1 p-3">
                 {links.map((link) => {
                   const active = isActive(link.href)
+                  const isFavourites = link.href === '/favourites'
                   return (
                     <Link
                       key={link.href}
@@ -124,7 +152,12 @@ export function Nav() {
                         <span className="h-1.5 w-1.5 rounded-full bg-gold" />
                       )}
                       {!active && <span className="h-1.5 w-1.5" />}
-                      {link.label}
+                      <span className="flex-1">{link.label}</span>
+                      {isFavourites && hasFavourites && (
+                        <span className="rounded-full bg-pitch/15 px-2 py-0.5 text-xs font-semibold text-pitch">
+                          {favourites.length}
+                        </span>
+                      )}
                     </Link>
                   )
                 })}

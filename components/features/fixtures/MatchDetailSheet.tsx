@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { useT } from '@/components/shared/LocaleProvider'
+import { FavouriteButton } from '@/components/shared/FavouriteButton'
 import type { MatchFixture, HistoricalMatchup } from '@/types/index'
 
 // ── Responsive side hook ──────────────────────────────────────────────────────
@@ -215,15 +216,22 @@ export function MatchDetailSheet({ fixture, matchup, trigger }: MatchDetailSheet
                 {homeTeam?.flagEmoji ?? '🏳'}
               </span>
               <span className="text-sm font-bold leading-tight text-zinc-900 dark:text-white">
-                {homeTeam?.name ?? fixture.homePlaceholder ?? 'TBD'}
+                {(homeTeam?.name ? (t.teamNames[homeTeam.name] ?? homeTeam.name) : null) ?? fixture.homePlaceholder ?? 'TBD'}
               </span>
               {homeTeam?.id && (
-                <Link
-                  href={`/teams/${homeTeam.id}`}
-                  className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
-                >
-                  {t.matchDetail.viewTeam}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/teams/${homeTeam.id}`}
+                    className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+                  >
+                    {t.matchDetail.viewTeam}
+                  </Link>
+                  <FavouriteButton
+                    teamId={homeTeam.id}
+                    teamName={t.teamNames[homeTeam.name] ?? homeTeam.name}
+                    size="sm"
+                  />
+                </div>
               )}
             </div>
 
@@ -259,15 +267,22 @@ export function MatchDetailSheet({ fixture, matchup, trigger }: MatchDetailSheet
                 {awayTeam?.flagEmoji ?? '🏳'}
               </span>
               <span className="text-sm font-bold leading-tight text-zinc-900 dark:text-white">
-                {awayTeam?.name ?? fixture.awayPlaceholder ?? 'TBD'}
+                {(awayTeam?.name ? (t.teamNames[awayTeam.name] ?? awayTeam.name) : null) ?? fixture.awayPlaceholder ?? 'TBD'}
               </span>
               {awayTeam?.id && (
-                <Link
-                  href={`/teams/${awayTeam.id}`}
-                  className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
-                >
-                  {t.matchDetail.viewTeam}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <FavouriteButton
+                    teamId={awayTeam.id}
+                    teamName={t.teamNames[awayTeam.name] ?? awayTeam.name}
+                    size="sm"
+                  />
+                  <Link
+                    href={`/teams/${awayTeam.id}`}
+                    className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+                  >
+                    {t.matchDetail.viewTeam}
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -404,7 +419,7 @@ function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
                 homeWon ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'
               }`}
             >
-              {fixture.home?.name ?? fixture.homePlaceholder ?? 'TBD'}
+              {(fixture.home?.name ? (t.teamNames[fixture.home.name] ?? fixture.home.name) : null) ?? fixture.homePlaceholder ?? 'TBD'}
             </span>
           </div>
 
@@ -427,7 +442,7 @@ function MatchCardInner({ fixture }: { fixture: MatchFixture }) {
                 awayWon ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'
               }`}
             >
-              {fixture.away?.name ?? fixture.awayPlaceholder ?? 'TBD'}
+              {(fixture.away?.name ? (t.teamNames[fixture.away.name] ?? fixture.away.name) : null) ?? fixture.awayPlaceholder ?? 'TBD'}
             </span>
           </div>
         </div>

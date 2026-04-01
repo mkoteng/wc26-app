@@ -41,7 +41,7 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
               onClick={() => updateParams({ group: undefined })}
               className={`cursor-pointer shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                 !activeGroup
-                  ? 'bg-pitch text-white dark:text-zinc-950'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                   : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
               }`}
             >
@@ -53,7 +53,7 @@ export function FixturesFilterBar({ activeGroup, activeDate }: FixturesFilterBar
                 onClick={() => updateParams({ group: activeGroup === g ? undefined : g })}
                 className={`cursor-pointer shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   activeGroup === g
-                    ? 'bg-pitch text-white dark:text-zinc-950'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                     : 'border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
                 }`}
               >

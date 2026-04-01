@@ -64,6 +64,6 @@ export async function GET() {
       cachedAt: new Date().toISOString(),
       error: message,
     }
-    return NextResponse.json(fallback, { status: 500 })
+    return NextResponse.json(fallback)
   }
 }

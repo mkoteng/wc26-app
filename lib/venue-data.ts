@@ -1,27 +1,7 @@
 /**
- * Static venue metadata not present in wc26-mcp (surface, roof) and
- * Wikipedia article titles used to fetch images from the Wikipedia REST API.
+ * Static venue metadata not present in wc26-mcp (surface, roof).
+ * Images are served locally from /public/venues/.
  */
-
-/** Exact Wikipedia article title for each venue — used by getWikipediaImage(). */
-export const VENUE_WIKIPEDIA_TITLES: Record<string, string> = {
-  metlife:       'MetLife Stadium',
-  sofi:          'SoFi Stadium',
-  att:           'AT&T Stadium',
-  hard_rock:     'Hard Rock Stadium',
-  mercedes_benz: 'Mercedes-Benz Stadium',
-  gillette:      'Gillette Stadium',
-  nrg:           'NRG Stadium',
-  arrowhead:     'Arrowhead Stadium',
-  lincoln:       'Lincoln Financial Field',
-  levis:         "Levi's Stadium",
-  lumen:         'Lumen Field',
-  azteca:        'Estadio Azteca',
-  akron:         'Estadio Akron',
-  bbva:          'Estadio BBVA',
-  bmo:           'BMO Field',
-  bc_place:      'BC Place',
-}
 
 export const VENUE_DETAILS: Record<string, { surface: string; roof: string }> = {
   metlife:       { surface: 'Natural grass',  roof: 'Open'        },

@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { dict } from '@/lib/i18n'
+import { FavouriteButton } from '@/components/shared/FavouriteButton'
 import type { Locale } from '@/lib/locale'
 import type { GroupStandingTable, GroupStanding } from '@/types/index'
 
@@ -30,13 +31,16 @@ function StandingRow({
   position,
   qualifies,
   mayQualify,
+  teamNames,
 }: {
   standing: GroupStanding
   position: number
   qualifies: boolean
   mayQualify: boolean
+  teamNames: Record<string, string>
 }) {
   const { team } = standing
+  const teamName = teamNames[team.name] ?? team.name
 
   return (
     <TableRow
@@ -84,7 +88,7 @@ function StandingRow({
                   ? 'text-zinc-800 group-hover/link:text-amber-500 dark:group-hover/link:text-amber-400'
                   : 'text-zinc-800 group-hover/link:text-zinc-600 dark:group-hover/link:text-zinc-300'
           }`}>
-            {team.name}
+            {teamName}
           </span>
         </Link>
       </TableCell>
@@ -134,8 +138,13 @@ function StandingRow({
       </TableCell>
 
       {/* Pts — always visible */}
-      <TableCell className="py-2.5 pr-4 text-center text-sm font-bold tabular-nums text-zinc-900 dark:text-white sm:pr-5">
+      <TableCell className="py-2.5 text-center text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
         {standing.points}
+      </TableCell>
+
+      {/* Favourite */}
+      <TableCell className="py-2.5 pr-2 text-center sm:pr-3">
+        <FavouriteButton teamId={team.id} teamName={teamName} size="sm" />
       </TableCell>
     </TableRow>
   )
@@ -144,7 +153,8 @@ function StandingRow({
 // ── GroupTable ────────────────────────────────────────────────────────────────
 
 export function GroupTable({ group, locale }: GroupTableProps) {
-  const t = dict[locale].groups
+  const d = dict[locale]
+  const t = d.groups
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       {/* Card header */}
@@ -179,6 +189,8 @@ export function GroupTable({ group, locale }: GroupTableProps) {
           <col className="hidden w-10 sm:table-column" />
           {/* Pts */}
           <col className="w-10" />
+          {/* ♥ */}
+          <col className="w-9" />
         </colgroup>
 
         <TableHeader>
@@ -210,9 +222,10 @@ export function GroupTable({ group, locale }: GroupTableProps) {
             <TableHead className="hidden py-2 text-center text-xs text-zinc-400 dark:text-zinc-500 sm:table-cell">
               {t.colGD}
             </TableHead>
-            <TableHead className="py-2 pr-4 text-center text-xs font-bold text-zinc-500 dark:text-zinc-400 sm:pr-5">
+            <TableHead className="py-2 text-center text-xs font-bold text-zinc-500 dark:text-zinc-400">
               {t.colPts}
             </TableHead>
+            <TableHead className="py-2 pr-2 sm:pr-3" />
           </TableRow>
         </TableHeader>
 
@@ -224,6 +237,7 @@ export function GroupTable({ group, locale }: GroupTableProps) {
               position={i + 1}
               qualifies={i < 2}
               mayQualify={i === 2}
+              teamNames={d.teamNames}
             />
           ))}
         </TableBody>
